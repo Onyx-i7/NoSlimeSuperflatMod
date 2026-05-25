@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "${modid}",
+    "name": "${modName}",
+    "description": "${description}",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/Onyx-i7/NoSlimeSuperflatMod",
+    "updateUrl": "https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases",
+    "authorList": ["Onyx_i7"],
+    "credits": "Inspired by Serilum's Superflat World No Slimes",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

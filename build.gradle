@@ -1,0 +1,150 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { 
+            name = "Forge Maven"
+            url = "https://maven.minecraftforge.net/" 
+        }
+        maven { 
+            name = "Files Minecraft"
+            url = "https://files.minecraftforge.net/maven" 
+        }
+        maven { 
+            name = "Architectury"
+            url = "https://maven.architectury.dev/" 
+        }
+        maven { 
+            name = "Minecraft Libraries"
+            url = "https://libraries.minecraft.net/" 
+        }
+        maven { 
+            name = "SpongePowered"
+            url = "https://repo.spongepowered.org/maven/" 
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+// =============================================================================
+// MOD CONFIGURATION
+// =============================================================================
+
+version = "1.1.0"
+group = "com.onyxi7.noslimesuperflat"
+archivesBaseName = "NoSlimeSuperflat-1.12.2"
+
+// Java 8 compatibility for Minecraft 1.12.2
+sourceCompatibility = targetCompatibility = '1.8'
+compileJava.options.encoding = 'UTF-8'
+
+minecraft {
+    version = "1.12.2-14.23.5.2847"
+    runDir = "run"
+    mappings = "snapshot_20171003"
+    makeObfSourceJar = false
+    useDepAts = true
+    
+    // Fix for Pack200 issue with Java 9+
+    // ForgeGradle 2.3 requires Java 8 for Pack200 support
+    if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
+        logger.warn("WARNING: ForgeGradle 2.3 requires Java 8. Current Java version: ${JavaVersion.current()}")
+        logger.warn("Pack200 may fail. Please use Java 8 for building.")
+    }
+}
+
+// =============================================================================
+// REPOSITORIES
+// =============================================================================
+
+repositories {
+    mavenCentral()
+    maven { 
+        name = "Forge Maven"
+        url = "https://maven.minecraftforge.net/" 
+    }
+    maven { 
+        name = "Files Minecraft"
+        url = "https://files.minecraftforge.net/maven" 
+    }
+    maven { 
+        name = "Architectury"
+        url = "https://maven.architectury.dev/" 
+    }
+}
+
+// =============================================================================
+// DEPENDENCIES
+// =============================================================================
+
+dependencies {
+    // No external dependencies - lightweight mod design
+}
+
+// =============================================================================
+// RESOURCE PROCESSING
+// =============================================================================
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+    inputs.property "modid", project.archivesBaseName.replace("-1.12.2", "")
+    inputs.property "modName", "No Slime Superflat"
+    inputs.property "description", "A lightweight, leak-free alternative to Collective for disabling slimes in Superflat worlds."
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version': project.version,
+               'mcversion': project.minecraft.version,
+               'modid': project.archivesBaseName.replace("-1.12.2", ""),
+               'modName': 'No Slime Superflat',
+               'description': 'A lightweight, leak-free alternative to Collective for disabling slimes in Superflat worlds.'
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+// =============================================================================
+// JAR CONFIGURATION
+// =============================================================================
+
+jar {
+    manifest {
+        attributes(
+            'FMLAT': 'noslimesuperflat_at.cfg',
+            'FMLCorePluginContainsFMLMod': 'true',
+            'ForceLoadAsMod': 'true',
+            'Specification-Version': project.version,
+            'Implementation-Version': project.version,
+            'Built-On': new Date().format('yyyy-MM-dd HH:mm:ss'),
+            'Built-With': "Gradle ${gradle.gradleVersion}"
+        )
+    }
+}
+
+// =============================================================================
+// BUILD TASKS
+// =============================================================================
+
+build.dependsOn jar
+
+// Custom task to verify build outputs
+task verifyBuild {
+    doLast {
+        println "Build verification complete"
+        println "Mod ID: ${archivesBaseName}"
+        println "Version: ${version}"
+        println "Minecraft: ${minecraft.version}"
+    }
+}
+
+build.finalizedBy verifyBuild
