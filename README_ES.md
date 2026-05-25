@@ -1,6 +1,5 @@
 # No Slime Superflat
 
-[![Build Status](https://github.com/Onyx-i7/NoSlimeSuperflat/actions/workflows/build.yml/badge.svg)](https://github.com/Onyx-i7/NoSlimeSuperflat/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.12.2-green.svg)](https://minecraft.net)
 [![Forge Version](https://img.shields.io/badge/Forge-14.23.5.2847-red.svg)](https://files.minecraftforge.net)
@@ -63,7 +62,7 @@ Si estas experimentando problemas de rendimiento, considera usar UniversalTweaks
 
 ### Pasos
 
-1. Descarga la ultima version desde la pagina de [Releases](https://github.com/Onyx-i7/NoSlimeSuperflat/releases)
+1. Descarga la ultima version desde la pagina de [Releases](https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases)
 2. Coloca el archivo JAR en tu carpeta `.minecraft/mods`
 3. Inicia Minecraft con el perfil de Forge
 4. Verifica la instalacion en el menu de Mods
@@ -93,8 +92,8 @@ El mod incluye una configuracion en tiempo de ejecucion accesible a traves de:
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/Onyx-i7/NoSlimeSuperflat.git
-cd NoSlimeSuperflat
+git clone https://github.com/Onyx-i7/NoSlimeSuperflatMod.git
+cd NoSlimeSuperflatMod
 
 # Hacer gradlew ejecutable (Linux/macOS)
 chmod +x gradlew
@@ -216,7 +215,7 @@ Antes de reportar un problema:
    - Descripcion del problema
    - Pasos para reproducir el problema
 
-Envia los problemas en: https://github.com/Onyx-i7/NoSlimeSuperflat/issues
+Envia los problemas en: https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues
 
 Ten en cuenta que este es un mod simple con complejidad minima. La mayoria de los problemas estan relacionados con una instalacion o configuracion incorrecta en lugar de errores en el mod en si.
 
@@ -255,6 +254,6 @@ Este mod no esta afiliado con Mojang Studios ni Microsoft. Minecraft es una marc
 
 ---
 
-**Repositorio:** https://github.com/Onyx-i7/NoSlimeSuperflat  
-**Problemas:** https://github.com/Onyx-i7/NoSlimeSuperflat/issues  
-**Versiones:** https://github.com/Onyx-i7/NoSlimeSuperflat/releases
+**Repositorio:** https://github.com/Onyx-i7/NoSlimeSuperflatMod  
+**Problemas:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues  
+**Versiones:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases

@@ -81,8 +81,8 @@ Once Java 8 is properly configured:
 
 ```bash
 # Clone repository
-git clone https://github.com/Onyx-i7/NoSlimeSuperflat.git
-cd NoSlimeSuperflat
+git clone https://github.com/Onyx-i7/NoSlimeSuperflatMod.git
+cd NoSlimeSuperflatMod
 
 # Make gradlew executable (Linux/macOS)
 chmod +x gradlew

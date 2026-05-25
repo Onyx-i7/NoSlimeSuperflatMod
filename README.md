@@ -48,7 +48,7 @@ This mod was created to address performance issues found in dependency-heavy sol
 - Forge 14.23.5.2847 or compatible
 
 ### Steps
-1. Download the latest release from the [Releases](https://github.com/Onyx-i7/NoSlimeSuperflat/releases) page
+1. Download the latest release from the [Releases](https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases) page
 2. Place the JAR file in your `.minecraft/mods` folder
 3. Launch Minecraft with Forge profile
 4. Verify installation in the Mods menu
@@ -76,8 +76,8 @@ The mod includes a runtime configuration accessible via:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Onyx-i7/NoSlimeSuperflat.git
-cd NoSlimeSuperflat
+git clone https://github.com/Onyx-i7/NoSlimeSuperflatMod.git
+cd NoSlimeSuperflatMod
 
 # Build the mod
 ./gradlew build
@@ -178,7 +178,7 @@ Before reporting an issue:
    - Latest log file
    - Configuration file
 
-Submit issues at: https://github.com/Onyx-i7/NoSlimeSuperflat/issues
+Submit issues at: https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues
 
 ## Compatibility
 
@@ -212,6 +212,6 @@ This mod is not affiliated with Mojang Studios or Microsoft. Minecraft is a trad
 
 ---
 
-**Repository:** https://github.com/Onyx-i7/NoSlimeSuperflat  
-**Issues:** https://github.com/Onyx-i7/NoSlimeSuperflat/issues  
-**Releases:** https://github.com/Onyx-i7/NoSlimeSuperflat/releases
+**Repository:** https://github.com/Onyx-i7/NoSlimeSuperflatMod  
+**Issues:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues  
+**Releases:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases

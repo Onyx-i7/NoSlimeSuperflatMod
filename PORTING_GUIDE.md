@@ -160,7 +160,7 @@ After porting:
 
 If you encounter issues while porting:
 
-1. Check existing [GitHub Issues](https://github.com/Onyx-i7/NoSlimeSuperflat/issues)
+1. Check existing [GitHub Issues](https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues)
 2. Review Forge documentation for your target version
 3. Compare with similar mods that support multiple versions
 4. Ensure you are using the correct Java version for the target Minecraft version
