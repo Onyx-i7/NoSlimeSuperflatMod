@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
  * event-driven approach to ensure zero memory leaks.
  * 
  * @author Onyx_i7
- * @version 1.1.0
+ * @version 1.1.1
  * @see NoSlimeSuperflat
  */
 @Mod.EventBusSubscriber(modid = NoSlimeSuperflat.MODID)

@@ -14,7 +14,7 @@ import java.io.File;
  * slime spawns in Superflat worlds. Inspired by Serilum's "Superflat World No Slimes".
  * 
  * @author Onyx_i7
- * @version 1.1.0
+ * @version 1.1.1
  * @since 1.12.2
  */
 @Mod(
@@ -32,7 +32,7 @@ public class NoSlimeSuperflat {
     public static final String NAME = "No Slime Superflat";
     
     /** Current version following Semantic Versioning */
-    public static final String VERSION = "1.1.0";
+    public static final String VERSION = "1.1.1";
     
     /** Logger instance for mod output */
     private static Logger logger;

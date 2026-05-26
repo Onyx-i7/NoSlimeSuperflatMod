@@ -17,7 +17,7 @@ import java.io.File;
  * - macOS: ~/Library/Application Support/minecraft/config/noslimesuperflat.cfg
  * 
  * @author Onyx_i7
- * @version 1.1.0
+ * @version 1.1.1
  */
 public class Config {
     
