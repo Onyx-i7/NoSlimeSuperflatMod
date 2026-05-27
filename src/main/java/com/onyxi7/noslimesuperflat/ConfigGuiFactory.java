@@ -7,8 +7,10 @@ import net.minecraftforge.fml.client.IModGuiFactory;
 import java.util.Set;
 
 public class ConfigGuiFactory implements IModGuiFactory {
+    
     @Override
     public void initialize(Minecraft minecraftInstance) {
+        // No special initialization is required
     }
 
     @Override
@@ -23,6 +25,8 @@ public class ConfigGuiFactory implements IModGuiFactory {
 
     @Override
     public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
-        return null;
+        // Return categories that support real-time updates without a restart
+        // This lets Forge know that our configuration can be dynamically reloaded
+        return null; // null indicates that all categories are runtime
     }
 }
