@@ -1,7 +1,6 @@
 package com.onyxi7.noslimesuperflat;
 
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -25,7 +24,7 @@ public class NoSlimeSuperflat {
 
     public static final String MODID = "noslimesuperflat";
     public static final String NAME = "No Slime Superflat";
-    public static final String VERSION = "1.2.0";
+    public static final String VERSION = "1.2.0-dev3";
 
     @Mod.Instance(MODID)
     public static NoSlimeSuperflat instance;
@@ -36,21 +35,18 @@ public class NoSlimeSuperflat {
     public static Logger logger;
     public static Configuration config;
 
-    // --- Configuration Variables ---
+    // --- Configuration Variables (Public & Static for Real-Time Access) ---
     
     // General
     public static boolean enableSlimePrevention = true;
     public static boolean enableDebugLogging = false;
-    
-    // Blacklist System (v1.2.0)
     public static List<String> entityBlacklist = new ArrayList<>();
-    public static boolean useBlacklist = true;
 
-    // Performance & Optimization (v1.2.0)
-    public static int maxEntitiesPerChunk = -1; // -1 disables limit
-    public static double despawnDistance = 128.0; // Instant despawn if player is further
-    public static boolean reduceAIOutsideRange = true;
-    public static int aiUpdateFrequency = 20; // Ticks between updates
+    // Performance
+    public static int maxSlimesPerChunk = -1; // -1 means unlimited
+    public static int slimeDespawnDistance = 128;
+    public static boolean reduceSlimeAI = true;
+    public static int slimeUpdateFrequency = 1;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -58,87 +54,69 @@ public class NoSlimeSuperflat {
         
         File configFile = event.getSuggestedConfigurationFile();
         config = new Configuration(configFile);
+        syncConfig();
         
-        try {
-            syncConfig();
-            logger.info("Configuration loaded successfully.");
-        } catch (Exception e) {
-            logger.error("Failed to load configuration!", e);
-        }
+        logger.info("No Slime Superflat v{} loaded.", VERSION);
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         proxy.init();
-        logger.info("No Slime Superflat v{} initialized.", VERSION);
-        if (enableDebugLogging) {
-            logger.debug("Debug mode is ENABLED.");
-            logger.debug("Blacklist entries: {}", entityBlacklist.size());
-        }
+        logger.info("Initialization complete.");
     }
 
     /**
-     * Synchronizes configuration file with static variables.
-     * Called on startup and when GUI is closed.
+     * Synchronizes configuration file with local variables.
+     * Called on load and when the GUI is closed.
      */
     public static void syncConfig() {
-        if (config == null) return;
-
         try {
             config.load();
 
-            // --- General Settings ---
-            Property propEnable = config.get("general", "enableSlimePrevention", true);
-            propEnable.setComment("If false, the mod does nothing. Main toggle.");
-            enableSlimePrevention = propEnable.getBoolean();
+            // General Settings
+            enableSlimePrevention = config.getBoolean(
+                "enableSlimePrevention", "general", true,
+                "If true, prevents slimes from spawning in Superflat worlds."
+            );
 
-            Property propDebug = config.get("general", "enableDebugLogging", false);
-            propDebug.setComment("Enables verbose logging for troubleshooting.");
-            enableDebugLogging = propDebug.getBoolean();
+            enableDebugLogging = config.getBoolean(
+                "enableDebugLogging", "general", false,
+                "Enables debug logging to the console when entities are blocked."
+            );
 
-            // --- Blacklist System (New in 1.2.0) ---
-            Property propUseBlacklist = config.get("blacklist", "useBlacklist", true);
-            propUseBlacklist.setComment("If true, entities in the 'entityBlacklist' will also be prevented from spawning in Superflat worlds.");
-            useBlacklist = propUseBlacklist.getBoolean();
+            entityBlacklist = new ArrayList<>(config.getStringList(
+                "entityBlacklist", "general", 
+                new String[]{"minecraft:magma_cube"}, 
+                "List of entity registry names to prevent from spawning in Superflat worlds (e.g., 'modid:entity_name')."
+            ));
 
-            Property propList = config.get("blacklist", "entityBlacklist", new String[]{
-                "minecraft:slime", 
-                "minecraft:magma_cube"
-            });
-            propList.setComment("List of Entity IDs to block. Format: 'modid:entity_name'.");
-            
-            // Convert array to List safely
-            entityBlacklist.clear();
-            for (String s : propList.getStringList()) {
-                if (s != null && !s.trim().isEmpty()) {
-                    entityBlacklist.add(s.trim().toLowerCase());
-                }
-            }
+            // Performance Settings
+            maxSlimesPerChunk = config.getInt(
+                "maxSlimesPerChunk", "performance", -1, -1, 100,
+                "Maximum number of slimes allowed per chunk. -1 for unlimited."
+            );
 
-            // --- Performance Settings (New in 1.2.0) ---
-            Property propMax = config.get("performance", "maxEntitiesPerChunk", -1);
-            propMax.setComment("Maximum allowed entities from the blacklist per chunk. -1 for unlimited.");
-            maxEntitiesPerChunk = propMax.getInt();
+            slimeDespawnDistance = config.getInt(
+                "slimeDespawnDistance", "performance", 128, 32, 512,
+                "Distance in blocks after which slimes are forcibly despawned for optimization."
+            );
 
-            Property propDespawn = config.get("performance", "despawnDistance", 128.0);
-            propDespawn.setComment("Distance in blocks. If a player is further than this, blocked entities are forcibly despawned instantly for performance.");
-            despawnDistance = propDespawn.getDouble();
+            reduceSlimeAI = config.getBoolean(
+                "reduceSlimeAI", "performance", true,
+                "Reduces AI updates for slimes when no player is nearby."
+            );
 
-            Property propAI = config.get("performance", "reduceAIOutsideRange", true);
-            propAI.setComment("If true, reduces AI tasks for blocked entities outside player render distance.");
-            reduceAIOutsideRange = propAI.getBoolean();
+            slimeUpdateFrequency = config.getInt(
+                "slimeUpdateFrequency", "performance", 1, 1, 20,
+                "How often (in ticks) slimes update their AI. Higher values improve performance."
+            );
 
-            Property propFreq = config.get("performance", "aiUpdateFrequency", 20);
-            propFreq.setComment("How often (in ticks) to check AI reduction. Higher = more performance.");
-            aiUpdateFrequency = propFreq.getInt();
-
-            // Set Category Comments
-            config.getCategory("general").setComment("General toggles and logging.");
-            config.getCategory("blacklist").setComment("Configure which mobs are affected by the mod.");
-            config.getCategory("performance").setComment("Advanced optimization settings. Modify only if you experience lag.");
+            // Category Comments
+            config.getCategory("general").setComment("General settings for No Slime Superflat");
+            config.getCategory("performance").setComment("Performance optimizations. Adjust these if you experience lag.");
 
         } catch (Exception e) {
-            logger.error("Critical error loading config", e);
+            logger.error("Failed to load configuration!", e);
         } finally {
             if (config.hasChanged()) {
                 config.save();

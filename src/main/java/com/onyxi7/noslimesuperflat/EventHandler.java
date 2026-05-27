@@ -8,93 +8,81 @@ import net.minecraft.world.WorldType;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.apache.logging.log4j.Level;
+import net.minecraftforge.fml.common.registry.EntityEntry;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
 
-/**
- * Handles all event subscriptions for the mod.
- * Optimized for minimal memory footprint and maximum performance.
- */
+import java.util.List;
+
 @Mod.EventBusSubscriber(modid = NoSlimeSuperflat.MODID)
 public class EventHandler {
 
-    /**
-     * Prevents slimes (and configured entities) from spawning in Superflat worlds.
-     * Uses early-exit logic to minimize CPU usage.
-     *
-     * @param event The spawn check event fired by Forge.
-     */
     @SubscribeEvent
     public static void onCheckSpawn(LivingSpawnEvent.CheckSpawn event) {
-        // Early exit: If prevention is disabled, do nothing immediately
+        // Early exit if prevention is disabled
         if (!NoSlimeSuperflat.enableSlimePrevention) {
             return;
         }
 
         Entity entity = event.getEntity();
-        
-        // Safety check: Ensure entity is not null
-        if (entity == null) {
-            return;
-        }
-
-        boolean isTargetEntity = false;
-        String entityIdentifier = "";
-
-        // 1. Check for vanilla Slimes
-        if (entity instanceof EntitySlime) {
-            isTargetEntity = true;
-            entityIdentifier = "minecraft:slime";
-        } 
-        // 2. Check against the customizable blacklist
-        else if (!NoSlimeSuperflat.entityBlacklist.isEmpty()) {
-            // Safe way to get registry name in 1.12.2
-            ResourceLocation registryName = entity.getRegistryName();
-            
-            if (registryName != null) {
-                entityIdentifier = registryName.toString();
-                if (NoSlimeSuperflat.entityBlacklist.contains(entityIdentifier)) {
-                    isTargetEntity = true;
-                }
-            }
-        }
-
-        // If entity is not in our target list, exit early
-        if (!isTargetEntity) {
-            return;
-        }
-
-        // Check world type
         World world = event.getWorld();
+
+        // Check if world is Superflat
         if (world == null || world.getWorldInfo().getTerrainType() != WorldType.FLAT) {
             return;
         }
 
-        // --- Performance Optimizations Applied ---
-        
-        // 3. Check Max Slimes Per Chunk (if configured)
-        if (NoSlimeSuperflat.maxSlimesPerChunk > 0) {
-            int currentCount = world.countEntities(entity.getClass());
-            // Rough estimation per chunk area to avoid expensive iteration
-            // If global count exceeds limit significantly, block spawn
-            if (currentCount > (NoSlimeSuperflat.maxSlimesPerChunk * 16)) { 
-                if (NoSlimeSuperflat.enableDebugLogging) {
-                    NoSlimeSuperflat.logger.log(Level.DEBUG, 
-                        "Blocked {} spawn due to global entity limit ({}).", 
-                        entityIdentifier, currentCount);
+        boolean isSlime = entity instanceof EntitySlime;
+        boolean isBlacklisted = false;
+        String entityName = entity.getClass().getSimpleName();
+
+        // Check Blacklist
+        if (!isSlime) {
+            ResourceLocation registryName = getEntityRegistryName(entity);
+            if (registryName != null) {
+                String regNameStr = registryName.toString().toLowerCase();
+                entityName = regNameStr;
+                for (String blacklisted : NoSlimeSuperflat.entityBlacklist) {
+                    if (blacklisted.toLowerCase().equals(regNameStr)) {
+                        isBlacklisted = true;
+                        break;
+                    }
                 }
-                event.setResult(net.minecraftforge.fml.common.eventhandler.Event.Result.DENY);
-                return;
             }
         }
 
-        // 4. Final Decision: Block the spawn
-        if (NoSlimeSuperflat.enableDebugLogging) {
-            NoSlimeSuperflat.logger.log(Level.DEBUG, 
-                "Blocked {} spawn at [{}, {}, {}] in Superflat world.", 
-                entityIdentifier, 
-                (int)event.getX(), (int)event.getY(), (int)event.getZ());
+        if (isSlime || isBlacklisted) {
+            // Performance: Max Slimes Per Chunk Check
+            if (NoSlimeSuperflat.maxSlimesPerChunk > 0 && (entity instanceof EntitySlime)) {
+                int currentCount = world.getEntitiesWithinAABB(EntitySlime.class, entity.getEntityBoundingBox().grow(16, 16, 16)).size();
+                // Rough estimate: 16x16 area check around spawn
+                if (currentCount > (NoSlimeSuperflat.maxSlimesPerChunk * 16)) { 
+                    if (NoSlimeSuperflat.enableDebugLogging) {
+                        NoSlimeSuperflat.logger.debug("Blocked {} spawn due to max count limit in chunk.", entityName);
+                    }
+                    event.setResult(net.minecraftforge.fml.common.eventhandler.Event.Result.DENY);
+                    return;
+                }
+            }
+
+            // Block Spawn
+            if (NoSlimeSuperflat.enableDebugLogging) {
+                NoSlimeSuperflat.logger.debug("Blocked {} spawn in Superflat world at [{}, {}, {}].", 
+                    entityName, Math.round(event.getX()), Math.round(event.getY()), Math.round(event.getZ()));
+            }
+            
+            event.setResult(net.minecraftforge.fml.common.eventhandler.Event.Result.DENY);
         }
-        
-        event.setResult(net.minecraftforge.fml.common.eventhandler.Event.Result.DENY);
+    }
+
+    /**
+     * Safely retrieves the registry name for an entity in 1.12.2.
+     */
+    private static ResourceLocation getEntityRegistryName(Entity entity) {
+        for (EntityEntry entry : EntityRegistry.getRegistry()) {
+            if (entry.getEntityClass() == entity.getClass()) {
+                return entry.getRegistryName();
+            }
+        }
+        return null;
     }
 }
