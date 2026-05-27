@@ -1,5 +1,6 @@
 package com.onyxi7.noslimesuperflat;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
@@ -7,43 +8,62 @@ import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-/**
- * Handles all event subscriptions for the mod.
- * Optimized for zero memory leaks and maximum performance.
- */
+import java.util.List;
+
 @Mod.EventBusSubscriber(modid = NoSlimeSuperflat.MODID)
 public class EventHandler {
 
-    /**
-     * Prevents slimes from spawning in Superflat worlds.
-     * Includes real-time configuration support.
-     */
     @SubscribeEvent
     public static void onCheckSpawn(LivingSpawnEvent.CheckSpawn event) {
-        // Early exit if prevention is disabled
+        // Early Exit: If prevention is disabled, do nothing (Zero overhead)
         if (!NoSlimeSuperflat.enableSlimePrevention) {
             return;
         }
 
-        // Check if entity is a slime
-        if (event.getEntity() instanceof EntitySlime) {
-            World world = event.getWorld();
+        Entity entity = event.getEntity();
+        if (entity == null || entity.world == null) {
+            return; // Safety check for null world/entity
+        }
+
+        World world = entity.world;
+
+        // Check if world is Superflat
+        if (world.getWorldInfo().getTerrainType() != WorldType.FLAT) {
+            return;
+        }
+
+        String entityName = entity.getName().toLowerCase();
+        boolean isTarget = false;
+
+        // Check default Slime
+        if (entity instanceof EntitySlime) {
+            isTarget = true;
+        }
+
+        // Check Blacklist (New in 1.2.0)
+        if (NoSlimeSuperflat.useBlacklist && !isTarget) {
+            // Use resource location for accurate matching if available, fallback to name
+            String registryName = entity.getRegistryName() != null ? 
+                entity.getRegistryName().toString().toLowerCase() : entityName;
             
-            // Check if world is Superflat
-            if (world != null && world.getWorldInfo().getTerrainType() == WorldType.FLAT) {
-                // Debug logging
-                if (NoSlimeSuperflat.enableDebugLogging) {
-                    NoSlimeSuperflat.logger.debug(
-                        "Blocked slime spawn at [{}, {}, {}] in Superflat world.", 
-                        Math.round(event.getX()), 
-                        Math.round(event.getY()), 
-                        Math.round(event.getZ())
-                    );
+            for (String blocked : NoSlimeSuperflat.entityBlacklist) {
+                if (registryName.equals(blocked) || entityName.equals(blocked)) {
+                    isTarget = true;
+                    break;
                 }
-                
-                // Deny spawn
-                event.setResult(net.minecraftforge.fml.common.eventhandler.Event.Result.DENY);
             }
+        }
+
+        if (isTarget) {
+            // Debug Logging
+            if (NoSlimeSuperflat.enableDebugLogging) {
+                NoSlimeSuperflat.logger.debug("Blocked {} spawn at [{}, {}, {}] in Superflat.", 
+                    entityName, 
+                    (int)event.getX(), (int)event.getY(), (int)event.getZ());
+            }
+
+            // Deny Spawn
+            event.setResult(net.minecraftforge.fml.common.eventhandler.Event.Result.DENY);
         }
     }
 }

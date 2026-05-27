@@ -1,6 +1,7 @@
 package com.onyxi7.noslimesuperflat;
 
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -9,6 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod(
     modid = NoSlimeSuperflat.MODID,
@@ -22,7 +25,7 @@ public class NoSlimeSuperflat {
 
     public static final String MODID = "noslimesuperflat";
     public static final String NAME = "No Slime Superflat";
-    public static final String VERSION = "1.1.3";
+    public static final String VERSION = "1.2.0";
 
     @Mod.Instance(MODID)
     public static NoSlimeSuperflat instance;
@@ -33,15 +36,21 @@ public class NoSlimeSuperflat {
     public static Logger logger;
     public static Configuration config;
 
-    // --- General Settings ---
+    // --- Configuration Variables ---
+    
+    // General
     public static boolean enableSlimePrevention = true;
     public static boolean enableDebugLogging = false;
+    
+    // Blacklist System (v1.2.0)
+    public static List<String> entityBlacklist = new ArrayList<>();
+    public static boolean useBlacklist = true;
 
-    // --- Performance Optimizations ---
-    public static int maxSlimesPerChunk = 0; // 0 = unlimited (but prevention handles it)
-    public static int slimeDespawnDistance = 128;
-    public static boolean reduceSlimeAI = true;
-    public static int slimeUpdateFrequency = 20; // Tick interval for AI updates
+    // Performance & Optimization (v1.2.0)
+    public static int maxEntitiesPerChunk = -1; // -1 disables limit
+    public static double despawnDistance = 128.0; // Instant despawn if player is further
+    public static boolean reduceAIOutsideRange = true;
+    public static int aiUpdateFrequency = 20; // Ticks between updates
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -49,61 +58,87 @@ public class NoSlimeSuperflat {
         
         File configFile = event.getSuggestedConfigurationFile();
         config = new Configuration(configFile);
-        syncConfig();
         
-        logger.info("No Slime Superflat loaded successfully.");
+        try {
+            syncConfig();
+            logger.info("Configuration loaded successfully.");
+        } catch (Exception e) {
+            logger.error("Failed to load configuration!", e);
+        }
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         proxy.init();
-        logger.info("Initialization complete.");
+        logger.info("No Slime Superflat v{} initialized.", VERSION);
+        if (enableDebugLogging) {
+            logger.debug("Debug mode is ENABLED.");
+            logger.debug("Blacklist entries: {}", entityBlacklist.size());
+        }
     }
 
     /**
-     * Synchronizes configuration file with local variables.
-     * Called on load and when GUI is closed.
+     * Synchronizes configuration file with static variables.
+     * Called on startup and when GUI is closed.
      */
     public static void syncConfig() {
+        if (config == null) return;
+
         try {
             config.load();
-            
-            // General Category
-            config.addCustomCategoryComment("general", "General settings for No Slime Superflat");
-            enableSlimePrevention = config.getBoolean(
-                "enableSlimePrevention", "general", true, 
-                "If true, prevents slimes from spawning in Superflat worlds."
-            );
-            enableDebugLogging = config.getBoolean(
-                "enableDebugLogging", "general", false, 
-                "Enables debug logging to the console when slimes are blocked."
-            );
 
-            // Performance Category
-            config.addCustomCategoryComment("performance", "Performance optimizations to reduce lag");
+            // --- General Settings ---
+            Property propEnable = config.get("general", "enableSlimePrevention", true);
+            propEnable.setComment("If false, the mod does nothing. Main toggle.");
+            enableSlimePrevention = propEnable.getBoolean();
+
+            Property propDebug = config.get("general", "enableDebugLogging", false);
+            propDebug.setComment("Enables verbose logging for troubleshooting.");
+            enableDebugLogging = propDebug.getBoolean();
+
+            // --- Blacklist System (New in 1.2.0) ---
+            Property propUseBlacklist = config.get("blacklist", "useBlacklist", true);
+            propUseBlacklist.setComment("If true, entities in the 'entityBlacklist' will also be prevented from spawning in Superflat worlds.");
+            useBlacklist = propUseBlacklist.getBoolean();
+
+            Property propList = config.get("blacklist", "entityBlacklist", new String[]{
+                "minecraft:slime", 
+                "minecraft:magma_cube"
+            });
+            propList.setComment("List of Entity IDs to block. Format: 'modid:entity_name'.");
             
-            maxSlimesPerChunk = config.getInt(
-                "maxSlimesPerChunk", "performance", 0, 0, 100, 
-                "Maximum number of slimes allowed per chunk. 0 = unlimited (prevention handles blocking)."
-            );
-            
-            slimeDespawnDistance = config.getInt(
-                "slimeDespawnDistance", "performance", 128, 32, 256, 
-                "Distance in blocks at which slimes instantly despawn to save memory."
-            );
-            
-            reduceSlimeAI = config.getBoolean(
-                "reduceSlimeAI", "performance", true, 
-                "Reduces AI calculations for slimes outside player range."
-            );
-            
-            slimeUpdateFrequency = config.getInt(
-                "slimeUpdateFrequency", "performance", 20, 1, 100, 
-                "Tick interval for slime AI updates. Higher = less CPU usage."
-            );
+            // Convert array to List safely
+            entityBlacklist.clear();
+            for (String s : propList.getStringList()) {
+                if (s != null && !s.trim().isEmpty()) {
+                    entityBlacklist.add(s.trim().toLowerCase());
+                }
+            }
+
+            // --- Performance Settings (New in 1.2.0) ---
+            Property propMax = config.get("performance", "maxEntitiesPerChunk", -1);
+            propMax.setComment("Maximum allowed entities from the blacklist per chunk. -1 for unlimited.");
+            maxEntitiesPerChunk = propMax.getInt();
+
+            Property propDespawn = config.get("performance", "despawnDistance", 128.0);
+            propDespawn.setComment("Distance in blocks. If a player is further than this, blocked entities are forcibly despawned instantly for performance.");
+            despawnDistance = propDespawn.getDouble();
+
+            Property propAI = config.get("performance", "reduceAIOutsideRange", true);
+            propAI.setComment("If true, reduces AI tasks for blocked entities outside player render distance.");
+            reduceAIOutsideRange = propAI.getBoolean();
+
+            Property propFreq = config.get("performance", "aiUpdateFrequency", 20);
+            propFreq.setComment("How often (in ticks) to check AI reduction. Higher = more performance.");
+            aiUpdateFrequency = propFreq.getInt();
+
+            // Set Category Comments
+            config.getCategory("general").setComment("General toggles and logging.");
+            config.getCategory("blacklist").setComment("Configure which mobs are affected by the mod.");
+            config.getCategory("performance").setComment("Advanced optimization settings. Modify only if you experience lag.");
 
         } catch (Exception e) {
-            logger.error("Failed to load configuration!", e);
+            logger.error("Critical error loading config", e);
         } finally {
             if (config.hasChanged()) {
                 config.save();

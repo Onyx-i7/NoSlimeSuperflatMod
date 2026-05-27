@@ -12,23 +12,17 @@ public class ConfigGui extends GuiConfig {
 
     public ConfigGui(GuiScreen parentScreen) {
         super(parentScreen, getConfigElements(), NoSlimeSuperflat.MODID, false, false, 
-              GuiConfig.getAbridgedConfigPath(NoSlimeSuperflat.config.toString()));
+            "No Slime Superflat v" + NoSlimeSuperflat.VERSION);
     }
 
     private static List<IConfigElement> getConfigElements() {
         List<IConfigElement> list = new ArrayList<>();
         
-        // Add categories
+        // Add categories dynamically based on what exists in Config
         list.add(new ConfigElement(NoSlimeSuperflat.config.getCategory("general")));
+        list.add(new ConfigElement(NoSlimeSuperflat.config.getCategory("blacklist")));
         list.add(new ConfigElement(NoSlimeSuperflat.config.getCategory("performance")));
         
         return list;
-    }
-    
-    @Override
-    public void onGuiClosed() {
-        super.onGuiClosed();
-        // Reload config to apply changes immediately
-        NoSlimeSuperflat.syncConfig();
     }
 }

@@ -8,10 +8,16 @@ This guide helps developers port No Slime Superflat to different Minecraft versi
 
 ### For Minecraft 1.12.2 (Current Target)
 
-- **JDK**: Java 8 (required - Pack200 was removed in Java 14+)
+- **JDK**: Java 8
 - **ForgeGradle**: 2.3-SNAPSHOT
 - **Gradle**: 4.10.3
 - **Mappings**: snapshot_20171003
+
+## Java Compatibility Note (v1.2.0+)
+
+Starting from version 1.2.0, this project no longer relies on Pack200 compression.
+- **Recommended JDK**: Java 8 for building (due to ForgeGradle 2.3 limitations), but the output jar is compatible with Java 14+ runtimes.
+- **Future Proofing**: Code structure avoids deprecated Java APIs, ensuring forward compatibility.
 
 ### Common Build Errors and Solutions
 

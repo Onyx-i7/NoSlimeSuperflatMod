@@ -56,8 +56,13 @@ This mod was created to address performance issues found in dependency-heavy sol
 ### Configuration
 
 The mod includes a runtime configuration accessible via:
-- In-game: Mods list > No Slime Superflat > Config button
 - File: `config/noslimesuperflat.cfg`
+
+Press `Esc` -> `Mods` -> `No Slime Superflat` -> `Config` to access:
+
+- **General**: Toggle prevention and debug logging.
+- **Blacklist**: Add custom Entity IDs (e.g., `twilightforest:swarm_spider`) to prevent them from spawning in Superflat.
+- **Performance**: Fine-tune AI reduction and despawn distances for maximum FPS on low-end PCs.
 
 #### Configuration Options
 
