@@ -24,7 +24,7 @@ public class NoSlimeSuperflat {
 
     public static final String MODID = "noslimesuperflat";
     public static final String NAME = "No Slime Superflat";
-    public static final String VERSION = "1.2.0-dev4";
+    public static final String VERSION = "1.2.0";
 
     @Mod.Instance(MODID)
     public static NoSlimeSuperflat instance;
@@ -75,7 +75,7 @@ public class NoSlimeSuperflat {
                 "Enables debug logging to the console when entities are blocked."
             );
 
-            // CORRECCIÓN 1: Inicialización explícita de la lista para compatibilidad con Java 8
+            // Inicialización explícita de la lista para compatibilidad con Java 8
             String[] defaultBlacklist = new String[]{"minecraft:magma_cube"};
             String[] currentBlacklist = config.getStringList(
                 "entityBlacklist", "general", 
