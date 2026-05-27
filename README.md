@@ -213,6 +213,6 @@ This mod is not made by Mojang Studios or Microsoft. Minecraft is a trademark of
 
 ---
 
-**Repository:** https://github.com/Onyx-i7/NoSlimeSuperflatMod
-**Issues:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues
+**Repository:** https://github.com/Onyx-i7/NoSlimeSuperflatMod \
+**Issues:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues \
 **Releases:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases
