@@ -24,7 +24,7 @@ public class NoSlimeSuperflat {
 
     public static final String MODID = "noslimesuperflat";
     public static final String NAME = "No Slime Superflat";
-    public static final String VERSION = "1.2.0-dev3";
+    public static final String VERSION = "1.2.0-dev4";
 
     @Mod.Instance(MODID)
     public static NoSlimeSuperflat instance;
@@ -35,15 +35,11 @@ public class NoSlimeSuperflat {
     public static Logger logger;
     public static Configuration config;
 
-    // --- Configuration Variables (Public & Static for Real-Time Access) ---
-    
-    // General
+    // Configuration variables
     public static boolean enableSlimePrevention = true;
     public static boolean enableDebugLogging = false;
     public static List<String> entityBlacklist = new ArrayList<>();
-
-    // Performance
-    public static int maxSlimesPerChunk = -1; // -1 means unlimited
+    public static int maxSlimesPerChunk = -1;
     public static int slimeDespawnDistance = 128;
     public static boolean reduceSlimeAI = true;
     public static int slimeUpdateFrequency = 1;
@@ -65,15 +61,10 @@ public class NoSlimeSuperflat {
         logger.info("Initialization complete.");
     }
 
-    /**
-     * Synchronizes configuration file with local variables.
-     * Called on load and when the GUI is closed.
-     */
     public static void syncConfig() {
         try {
             config.load();
 
-            // General Settings
             enableSlimePrevention = config.getBoolean(
                 "enableSlimePrevention", "general", true,
                 "If true, prevents slimes from spawning in Superflat worlds."
@@ -84,13 +75,21 @@ public class NoSlimeSuperflat {
                 "Enables debug logging to the console when entities are blocked."
             );
 
-            entityBlacklist = new ArrayList<>(config.getStringList(
+            // CORRECCIÓN 1: Inicialización explícita de la lista para compatibilidad con Java 8
+            String[] defaultBlacklist = new String[]{"minecraft:magma_cube"};
+            String[] currentBlacklist = config.getStringList(
                 "entityBlacklist", "general", 
-                new String[]{"minecraft:magma_cube"}, 
+                defaultBlacklist, 
                 "List of entity registry names to prevent from spawning in Superflat worlds (e.g., 'modid:entity_name')."
-            ));
+            );
+            
+            entityBlacklist.clear();
+            for (String s : currentBlacklist) {
+                if (!s.isEmpty()) {
+                    entityBlacklist.add(s.trim().toLowerCase());
+                }
+            }
 
-            // Performance Settings
             maxSlimesPerChunk = config.getInt(
                 "maxSlimesPerChunk", "performance", -1, -1, 100,
                 "Maximum number of slimes allowed per chunk. -1 for unlimited."
@@ -111,7 +110,6 @@ public class NoSlimeSuperflat {
                 "How often (in ticks) slimes update their AI. Higher values improve performance."
             );
 
-            // Category Comments
             config.getCategory("general").setComment("General settings for No Slime Superflat");
             config.getCategory("performance").setComment("Performance optimizations. Adjust these if you experience lag.");
 
