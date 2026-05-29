@@ -20,7 +20,6 @@ public class ConfigGui extends GuiConfig {
         
         // Add categories dynamically based on what exists in Config
         list.add(new ConfigElement(NoSlimeSuperflat.config.getCategory("general")));
-        list.add(new ConfigElement(NoSlimeSuperflat.config.getCategory("blacklist")));
         list.add(new ConfigElement(NoSlimeSuperflat.config.getCategory("performance")));
         
         return list;

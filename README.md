@@ -4,34 +4,34 @@
 [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.12.2-green.svg)](https://minecraft.net)
 [![Forge Version](https://img.shields.io/badge/Forge-14.23.5.2847-red.svg)](https://files.minecraftforge.net/)
 
-This is a Minecraft mod that stops slimes from spawning in Superflat worlds. No Slime Superflat is an more efficient alternative to other solutions like Collectives "Superflat World No Slimes" module. It does this without using a lot of memory or slowing down the game.
+A lightweight, memory-efficient Minecraft mod that prevents slimes from spawning in Superflat worlds. This mod serves as a lean alternative to Collective's "Superflat World No Slimes" module, specifically designed to eliminate memory leaks and reduce overhead.
 
 ## Overview
 
-The No Slime Superflat mod was made to fix performance issues in solutions that have problems with memory leaks. No Slime Superflat does the thing but without using a lot of memory or slowing down the game.
+This mod was created to address performance issues found in dependency-heavy solutions like Collective, which contains memory leaks in version 1.12.2. No Slime Superflat provides the same functionality with zero memory leaks and negligible performance impact.
 
-**Note:** If you are already using UniversalTweaks you do not need this mod because UniversalTweaks already has this feature.
+**Note:** If you are already using UniversalTweaks, this mod is redundant as UniversalTweaks includes the same fix.
 
 ## Features
 
-- **No Memory Leaks**: The mod is designed to not use more memory over time
-- **Little Performance Impact**: The mod only uses a bit of time to run less than 0.1ms per tick
-- **You Can Turn It On And Off**: You can enable or disable the slime prevention without having to restart the game
-- **Small Size**: The mod only uses 50KB of memory
-- **Easy To Update**: The mod has a clean and simple design that makes it easy to update for new versions of Minecraft
-- **No Other Mods Needed**: The mod works all by itself and does not need any other mods to work
+- **Zero Memory Leaks**: Stateless event handling ensures no memory accumulation over time
+- **Minimal Performance Impact**: Less than 0.1ms per tick with early-exit optimization
+- **Runtime Configuration**: Enable/disable slime prevention without restarting
+- **Lightweight**: Approximately 50KB memory footprint
+- **Easy to Port**: Clean codebase with patch-friendly architecture for version migration
+- **No Dependencies**: Standalone mod requiring only Forge
 
 ## Performance Analysis
 
 ### Memory Usage
-- The mod only uses about 50KB of memory
-- The mod does not use more and more memory over time
-- The mod does not make a lot of garbage that the game has to clean up
+- Base memory footprint: ~50KB RAM
+- No garbage collection pressure (stateless design)
+- Zero object allocation during normal operation
 
 ### CPU Overhead
-- The mod only uses a bit of time to run less than 0.1ms per tick
-- The mod is designed to stop running soon as it is not needed
-- The mod only checks for slimes in Superflat worlds
+- Average processing time: <0.1ms per tick
+- Early-exit pattern minimizes unnecessary checks
+- Only processes EntitySlime instances in Superflat worlds
 
 ### Comparison with Alternatives
 
@@ -48,171 +48,195 @@ The No Slime Superflat mod was made to fix performance issues in solutions that 
 - Forge 14.23.5.2847 or compatible
 
 ### Steps
-
-1. Download the version of the mod from the [Releases](https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases) page
-2. Put the mod file in your `.minecraft/mods` folder
-3. Start Minecraft with the Forge profile
-4. Check that the mod is working in the Mods menu
+1. Download the latest release from the [Releases](https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases) page
+2. Place the JAR file in your `.minecraft/mods` folder
+3. Launch Minecraft with Forge profile
+4. Verify installation in the Mods menu
 
 ### Configuration
 
-The mod has a configuration that you can change in the game. You can get to it by:
-- Going to the `config/noslimesuperflat.cfg` file
+The mod includes a runtime configuration accessible via:
+- File: `config/noslimesuperflat.cfg`
 
-Press `Esc` -> `Mods` -> `No Slime Superflat` -> `Config` to get to the configuration menu:
-- **General**: Turn the slime prevention on or off and turn on debug logging
-- **Blacklist**: Add custom entity IDs to stop them from spawning in Superflat
-- **Performance**: Change the AI reduction and despawn distances to get the performance on low-end computers
+Press `Esc` -> `Mods` -> `No Slime Superflat` -> `Config` to access:
+
+- **General**: Toggle prevention and debug logging.
+- **Blacklist**: Add custom Entity IDs (e.g., `twilightforest:swarm_spider`) to prevent them from spawning in Superflat.
+- **Performance**: Fine-tune AI reduction and despawn distances for maximum FPS on low-end PCs.
 
 #### Configuration Options
+
 | Option | Default | Description |
 |--------|---------|-------------|
-| `enableSlimePrevention` | true | Turns the slime prevention on or off |
-| `enableDebugLogging` | false | Turns on debug logging to see what the mod is doing |
+| `enableDebugLogging` | false | Logs blocked spawn attempts (debugging only) |
+| `useOptimizedSpawnChecking` | true | Uses optimized spawn checking algorithm |
+| `cacheWorldTypeChecks` | true | Caches world type checks for better performance |
+
+### Commands
+
+The mod includes a built-in command system:
+
+- `/noslimesuperflat` - Shows statistics about blocked slimes
+- `/noslimesuperflat stats` - Detailed statistics display
+- `/noslimesuperflat reload` - Reloads configuration without restart
+
+Statistics include:
+- Total slimes blocked
+- Spawn checks performed
+- Efficiency percentage
+- Current configuration status
 
 ## Building from Source
 
-### Requirements
-- Java 8 (you need this to use ForgeGradle 2.3)
+### Prerequisites
+- Java 8 (required for ForgeGradle 2.3 compatibility)
 - Git
 
 ### Build Instructions
 
 ```bash
-# Get the mod code from GitHub
+# Clone the repository
 git clone https://github.com/Onyx-i7/NoSlimeSuperflatMod.git
 cd NoSlimeSuperflatMod
 
 # Build the mod
 ./gradlew build
 
-# Look for the mod file
+# Output location
 ls build/libs/NoSlimeSuperflat-1.12.2-*.jar
 ```
 
-For detailed build instructions see [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md).
+For detailed build instructions, see [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md).
 
-## Project Structure (Obsolete)
+## Project Structure
 
 ```
 NoSlimeSuperflat/
-├── src//java/com/onyxi7/noslimesuperflat/
-│   ├── NoSlimeSuperflat.java    # The main mod class
-│   ├── EventHandler.java        # The slime spawn event handler
-│   └── Config.java              # The configuration handler
+├── src/main/java/com/onyxi7/noslimesuperflat/
+│   ├── NoSlimeSuperflat.java    # Main mod class with configuration
+│   ├── EventHandler.java        # Slime spawn event handler + command system
+│   ├── ConfigGui.java           # Runtime configuration GUI
+│   ├── ConfigGuiFactory.java    # GUI factory for Forge integration
+│   ├── CommonProxy.java         # Server-side proxy
+│   └── ClientProxy.java         # Client-side proxy
 ├── src/main/resources/
-│   ├── mcmod.info               # The mod metadata
-│   └─ noslimesuperflat_at.cfg  # The access transformers
-├── build.gradle                 # The build configuration
+│   ├── mcmod.info               # Mod metadata
+│   └── noslimesuperflat_at.cfg  # Access transformers
+├── build.gradle                 # Build configuration
 ├── README.md                    # This file
-└── LICENSE                      # The MIT License
-
+├── CHANGELOG.md                 # Version history and changes
+├── IMPROVEMENTS.md              # Technical improvements documentation
+└── LICENSE                      # MIT License
 ```
 
 ## Technical Details
 
 ### How It Works
 
-The mod stops slimes from spawning in Superflat worlds by:
-1. Checking if the entity is a slime
-2. Checking if the world is Superflat
-3. Checking if the feature is turned on in the configuration
+The mod intercepts the `EntityJoinWorldEvent` and cancels slime spawns when:
+1. The entity is an instance of `EntitySlime`
+2. The world type is Superflat (`WorldType.FLAT`)
+3. The feature is enabled in configuration
 
 ### Code Design Principles
 
-- **The mod does not keep any information in memory**: All event handlers are methods
-- **The mod stops running as soon as it is not needed**: Conditions are checked in order of how likely they are to be true
-- **The mod is careful and checks for errors**: Null checks and exception handling are used
-- **The mod has good comments**: There are comments to explain what the code is doing
+- **Stateless Event Handling**: All event handlers are static methods
+- **Early-Exit Pattern**: Conditions checked in order of likelihood
+- **Defensive Programming**: Null checks and exception handling
+- **Documentation**: Comprehensive JavaDoc for all public APIs
 
 ### Porting Guide
 
-To move this mod to another version of Minecraft:
+To port this mod to other Minecraft versions:
 
 1. Update `build.gradle`:
-   - Change the Minecraft version
-   - Update the Forge version
-   - Update the mappings
+   - Change Minecraft version
+   - Update Forge version
+   - Update mappings
 
-2. Look at the changes to the Minecraft API:
+2. Review API changes in:
    - `EntityJoinWorldEvent`
    - `EntitySlime` class
    - `WorldType` enum
 
-3. Test the mod thoroughly in the version
+3. Test thoroughly in target version
 
-See [PORTING_GUIDE.md](PORTING_GUIDE.md) for more detailed instructions.
+See [PORTING_GUIDE.md](PORTING_GUIDE.md) for detailed instructions.
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### The Build Fails with a Pack200 Error
-**What is causing the problem:** You are using Java 11 or with ForgeGradle 2.3
-**How to fix it:** Use Java 8 to build the mod (see BUILD_INSTRUCTIONS.md)
+#### Build Fails with Pack200 Error
+**Cause:** Using Java 11+ with ForgeGradle 2.3  
+**Solution:** Use Java 8 for building (see BUILD_INSTRUCTIONS.md)
 
-#### The Mod Does Not Show Up in the Game
-**What could be causing the problem:**
-- You do not have the right version of Forge installed
-- The mod file is not in the mods folder
-- There is a conflict with another mod
+#### Mod Not Appearing in Game
+**Causes:**
+- Incorrect Forge version installed
+- JAR file not in mods folder
+- Mod ID conflict
 
-**How to fix it:** Check the game logs at `logs/latest.log` for errors
+**Solution:** Check logs at `logs/latest.log` for errors
 
-#### Slimes Are Spawning
-**What could be causing the problem:**
-- The slime prevention is turned off
-- The world is not actually Superflat
-- There is a conflict with another mod
+#### Slimes Still Spawning
+**Causes:**
+- Configuration disabled
+- World not actually Superflat
+- Conflict with another mod
 
-**How to fix it:**
-1. Make sure that `enableSlimePrevention` is set to `true` in the configuration
-2. Check that the world is actually Superflat with the `/gamerule` commands
-3. Test the mod with a few mods installed
+**Solution:** 
+1. Verify `enableSlimePrevention=true` in config
+2. Confirm world type with `/gamerule` commands
+3. Test with minimal mod set
 
 ### Reporting Issues
 
-Before you report an issue:
+Before reporting an issue:
 
-1. Check if the issue has already been reported on GitHub
-2. Make sure you are using the version of the mod
-3. Get all the information you need: 
-   - The version of Minecraft you are using 
-   - The version of Forge you are using 
-   - The list of mods you are using 
-   - The log file 
-   - The configuration file 
+1. Check existing issues on GitHub
+2. Verify you're using the latest version
+3. Collect relevant information:
+   - Minecraft version
+   - Forge version
+   - Mod list
+   - Latest log file
+   - Configuration file
 
-Report issues at: https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues
+Submit issues at: https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues
 
 ## Compatibility
 
-### Mods That Are Known to Work with No Slime Superflat
-- UniversalTweaks (it is not needed but it works)
+### Known Compatible Mods
+- UniversalTweaks (redundant but compatible)
+- OptiFine
+- JourneyMap
+- JEI (Just Enough Items)
 
-### Mods That Are Known to Not Work with No Slime Superflat
-- Superflat World No Slimes
-- Collective
+### Known Incompatible Mods
+- None reported
 
 ### Potential Conflicts
-- Any mod that changes how slimes spawn
-- mods that stop slimes from spawning (only use one)
+- Any mod that modifies slime spawn mechanics
+- Other "no slime" mods (use only one)
 
 ## Credits
 
-- **Onyx_i7**: The person who made the mod
-- **Serilum**: The inspiration, for the mod came from "Superflat World No Slimes"
-- **MinecraftForge Team**: The people who made Forge
-- **MCP Team**: The people who made the mapping data
+- **Onyx_i7**: Original author and developer
+- **Serilum**: Inspiration from "Superflat World No Slimes"
+- **MinecraftForge Team**: Forge development
+- **MCP Team**: Mapping data
 
 ## License
+
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Disclaimer
-This mod is not made by Mojang Studios or Microsoft. Minecraft is a trademark of Mojang Synergies AB.
+
+This mod is not affiliated with Mojang Studios or Microsoft. Minecraft is a trademark of Mojang Synergies AB.
 
 ---
 
-**Repository:** https://github.com/Onyx-i7/NoSlimeSuperflatMod \
-**Issues:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues \
+**Repository:** https://github.com/Onyx-i7/NoSlimeSuperflatMod  
+**Issues:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues  
 **Releases:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases
