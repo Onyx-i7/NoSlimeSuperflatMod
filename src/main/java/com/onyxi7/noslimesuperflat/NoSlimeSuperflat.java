@@ -1,45 +1,44 @@
 package com.onyxi7.noslimesuperflat;
 
 import com.onyxi7.noslimesuperflat.commands.CommandNoSlimeSuperflat;
-import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Mod(
-    modid = NoSlimeSuperflat.MODID,
-    name = NoSlimeSuperflat.NAME,
-    version = NoSlimeSuperflat.VERSION,
-    acceptedMinecraftVersions = "[1.12,1.13)",
-    dependencies = "required-after:forge@[14.23.5.2847,)",
-    guiFactory = "com.onyxi7.noslimesuperflat.ConfigGuiFactory"
-)
+@Mod(NoSlimeSuperflat.MODID)
 public class NoSlimeSuperflat {
 
     public static final String MODID = "noslimesuperflat";
     public static final String NAME = "No Slime Superflat";
-    public static final String VERSION = "1.2.1";
+    public static final String VERSION = "1.3.0";
 
-    @Mod.Instance(MODID)
-    public static NoSlimeSuperflat instance;
+    public static final Logger logger = LogManager.getLogger(MODID);
 
-    @SidedProxy(clientSide = "com.onyxi7.noslimesuperflat.ClientProxy", serverSide = "com.onyxi7.noslimesuperflat.CommonProxy")
-    public static CommonProxy proxy;
+    // Config Spec
+    public static ForgeConfigSpec COMMON_CONFIG;
+    public static ForgeConfigSpec.BooleanValue ENABLE_SLIME_PREVENTION;
+    public static ForgeConfigSpec.BooleanValue ENABLE_DEBUG_LOGGING;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> ENTITY_BLACKLIST;
+    public static ForgeConfigSpec.IntValue MAX_SLIMES_PER_CHUNK;
+    public static ForgeConfigSpec.IntValue SLIME_DESPAWN_DISTANCE;
+    public static ForgeConfigSpec.BooleanValue REDUCE_SLIME_AI;
+    public static ForgeConfigSpec.IntValue SLIME_UPDATE_FREQUENCY;
+    public static ForgeConfigSpec.BooleanValue USE_OPTIMIZED_SPAWN_CHECKING;
+    public static ForgeConfigSpec.BooleanValue CACHE_WORLD_TYPE_CHECKS;
 
-    public static Logger logger;
-    public static Configuration config;
-
-    // Configuration Variables
+    // Configuration Variables (loaded from config)
     public static boolean enableSlimePrevention = true;
     public static boolean enableDebugLogging = false;
     public static List<String> entityBlacklist = new ArrayList<>();
@@ -47,8 +46,6 @@ public class NoSlimeSuperflat {
     public static int slimeDespawnDistance = 128;
     public static boolean reduceSlimeAI = true;
     public static int slimeUpdateFrequency = 1;
-    
-    // Optimization Flags
     public static boolean useOptimizedSpawnChecking = true;
     public static boolean cacheWorldTypeChecks = true;
 
@@ -56,60 +53,87 @@ public class NoSlimeSuperflat {
     private static final AtomicLong blockedSlimeCount = new AtomicLong(0);
     private static final AtomicLong spawnCheckCount = new AtomicLong(0);
 
-    @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        logger = LogManager.getLogger(MODID);
-        File configFile = event.getSuggestedConfigurationFile();
-        config = new Configuration(configFile);
-        syncConfig();
+    static {
+        ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
+
+        COMMON_BUILDER.comment("General settings").push("general");
+        ENABLE_SLIME_PREVENTION = COMMON_BUILDER
+            .comment("Prevents slimes from spawning in Superflat worlds.")
+            .define("enableSlimePrevention", true);
+        ENABLE_DEBUG_LOGGING = COMMON_BUILDER
+            .comment("Enables debug logging.")
+            .define("enableDebugLogging", false);
+        ENTITY_BLACKLIST = COMMON_BUILDER
+            .comment("Entities to block.")
+            .defineList("entityBlacklist", 
+                () -> java.util.Arrays.asList("minecraft:magma_cube"),
+                obj -> obj instanceof String);
+        COMMON_BUILDER.pop();
+
+        COMMON_BUILDER.comment("Performance optimizations").push("performance");
+        MAX_SLIMES_PER_CHUNK = COMMON_BUILDER
+            .comment("Max slimes per chunk.")
+            .defineInRange("maxSlimesPerChunk", -1, -1, 100);
+        SLIME_DESPAWN_DISTANCE = COMMON_BUILDER
+            .comment("Despawn distance.")
+            .defineInRange("slimeDespawnDistance", 128, 32, 512);
+        REDUCE_SLIME_AI = COMMON_BUILDER
+            .comment("Reduce AI updates.")
+            .define("reduceSlimeAI", true);
+        SLIME_UPDATE_FREQUENCY = COMMON_BUILDER
+            .comment("AI update frequency.")
+            .defineInRange("slimeUpdateFrequency", 1, 1, 20);
+        USE_OPTIMIZED_SPAWN_CHECKING = COMMON_BUILDER
+            .comment("Use optimized checking logic.")
+            .define("useOptimizedSpawnChecking", true);
+        CACHE_WORLD_TYPE_CHECKS = COMMON_BUILDER
+            .comment("Cache world type checks.")
+            .define("cacheWorldTypeChecks", true);
+        COMMON_BUILDER.pop();
+
+        COMMON_CONFIG = COMMON_BUILDER.build();
+    }
+
+    public NoSlimeSuperflat() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        // Register config
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, COMMON_CONFIG);
+
+        // Register mod lifecycle events (Mod Bus)
+        modEventBus.addListener(this::commonSetup);
+        
+        // Register game events (Forge Bus)
+        MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
+
         logger.info("No Slime Superflat v{} loaded.", VERSION);
     }
 
-    @Mod.EventHandler
-    public void init(FMLInitializationEvent event) {
-        proxy.init();
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        loadConfigValues();
         logger.info("Initialization complete.");
     }
 
-    @Mod.EventHandler
-    public void serverStarting(FMLServerStartingEvent event) {
-        event.registerServerCommand(new CommandNoSlimeSuperflat());
+    private void onRegisterCommands(RegisterCommandsEvent event) {
+        CommandNoSlimeSuperflat.register(event.getDispatcher());
         logger.info("Command /noslimesuperflat registered.");
     }
 
-    public static void syncConfig() {
-        try {
-            config.load();
-
-            enableSlimePrevention = config.getBoolean("enableSlimePrevention", "general", true, "Prevents slimes from spawning in Superflat worlds.");
-            enableDebugLogging = config.getBoolean("enableDebugLogging", "general", false, "Enables debug logging.");
-            
-            entityBlacklist = new ArrayList<>();
-            Collections.addAll(entityBlacklist, config.getStringList("entityBlacklist", "general", new String[]{"minecraft:magma_cube"}, "Entities to block."));
-
-            maxSlimesPerChunk = config.getInt("maxSlimesPerChunk", "performance", -1, -1, 100, "Max slimes per chunk.");
-            slimeDespawnDistance = config.getInt("slimeDespawnDistance", "performance", 128, 32, 512, "Despawn distance.");
-            reduceSlimeAI = config.getBoolean("reduceSlimeAI", "performance", true, "Reduce AI updates.");
-            slimeUpdateFrequency = config.getInt("slimeUpdateFrequency", "performance", 1, 1, 20, "AI update frequency.");
-            
-            useOptimizedSpawnChecking = config.getBoolean("useOptimizedSpawnChecking", "performance", true, "Use optimized checking logic.");
-            cacheWorldTypeChecks = config.getBoolean("cacheWorldTypeChecks", "performance", true, "Cache world type checks.");
-
-            config.getCategory("general").setComment("General settings.");
-            config.getCategory("performance").setComment("Performance optimizations.");
-
-        } catch (Exception e) {
-            logger.error("Failed to load configuration!", e);
-        } finally {
-            if (config.hasChanged()) {
-                config.save();
-            }
-        }
+    public static void loadConfigValues() {
+        enableSlimePrevention = ENABLE_SLIME_PREVENTION.get();
+        enableDebugLogging = ENABLE_DEBUG_LOGGING.get();
+        entityBlacklist = new ArrayList<>(ENTITY_BLACKLIST.get());
+        maxSlimesPerChunk = MAX_SLIMES_PER_CHUNK.get();
+        slimeDespawnDistance = SLIME_DESPAWN_DISTANCE.get();
+        reduceSlimeAI = REDUCE_SLIME_AI.get();
+        slimeUpdateFrequency = SLIME_UPDATE_FREQUENCY.get();
+        useOptimizedSpawnChecking = USE_OPTIMIZED_SPAWN_CHECKING.get();
+        cacheWorldTypeChecks = CACHE_WORLD_TYPE_CHECKS.get();
     }
 
     public static void reloadConfig() {
-        syncConfig();
-        resetStatistics(); // Optional: reset stats on reload if desired, or keep them
+        loadConfigValues();
+        resetStatistics();
         logger.info("Configuration reloaded via command.");
     }
 
@@ -135,9 +159,16 @@ public class NoSlimeSuperflat {
         spawnCheckCount.set(0);
         logger.info("Statistics reset.");
     }
-    
-    // Helper for imports if needed elsewhere
+
+    // Helper for checking if world is superflat
     public static boolean isSuperflatWorld(net.minecraft.world.World world) {
-        return world.getWorldInfo().getTerrainType() == net.minecraft.world.WorldType.FLAT;
+        if (world.isClientSide()) {
+            return false;
+        }
+        if (world.getChunkSource() instanceof net.minecraft.world.server.ServerChunkProvider) {
+            return ((net.minecraft.world.server.ServerChunkProvider) world.getChunkSource()).generator 
+                instanceof net.minecraft.world.gen.FlatChunkGenerator;
+        }
+        return false;
     }
 }

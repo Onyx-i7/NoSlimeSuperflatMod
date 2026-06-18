@@ -1,14 +1,16 @@
 package com.onyxi7.noslimesuperflat;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
+import net.minecraft.world.gen.FlatChunkGenerator;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraft.entity.EntityList;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber(modid = NoSlimeSuperflat.MODID)
 public class EventHandler {
@@ -21,7 +23,7 @@ public class EventHandler {
         }
 
         Entity entity = event.getEntity();
-        World world = event.getWorld();
+        World world = (World) event.getWorld();
 
         if (world == null) {
             return;
@@ -30,13 +32,15 @@ public class EventHandler {
         // Increment check count
         NoSlimeSuperflat.incrementCheckCount();
 
-        boolean isSlime = entity instanceof EntitySlime;
+        boolean isSlime = entity instanceof SlimeEntity;
         boolean isBlacklisted = false;
-        String entityName = entity.getClass().getSimpleName();
+        String entityName = entity.getType().getRegistryName() != null ? 
+            entity.getType().getRegistryName().toString() : 
+            entity.getClass().getSimpleName();
 
         // Check blacklist for non-slime entities
         if (!isSlime) {
-            ResourceLocation registryName = EntityList.getKey(entity);
+            ResourceLocation registryName = ForgeRegistries.ENTITIES.getKey(entity.getType());
             if (registryName != null) {
                 String regNameStr = registryName.toString().toLowerCase();
                 entityName = regNameStr;
@@ -51,17 +55,18 @@ public class EventHandler {
 
         if (isSlime || isBlacklisted) {
             // Check if it's a superflat world
-            if (world.getWorldInfo().getTerrainType() == WorldType.FLAT) {
+            if (isSuperflatWorld(world)) {
                 
                 // Performance: Max slimes per chunk check
-                if (NoSlimeSuperflat.maxSlimesPerChunk > 0 && (entity instanceof EntitySlime)) {
-                    int currentCount = world.getEntitiesWithinAABB(EntitySlime.class, entity.getEntityBoundingBox().grow(16, 16, 16)).size();
+                if (NoSlimeSuperflat.maxSlimesPerChunk > 0 && (entity instanceof SlimeEntity)) {
+                    AxisAlignedBB bb = entity.getBoundingBox().inflate(16, 16, 16);
+                    long currentCount = world.getEntitiesOfClass(SlimeEntity.class, bb).size();
                     if (currentCount > (NoSlimeSuperflat.maxSlimesPerChunk * 16)) {
                         if (NoSlimeSuperflat.enableDebugLogging) {
                             NoSlimeSuperflat.logger.debug("Blocked {} spawn due to max count limit.", entityName);
                         }
                         NoSlimeSuperflat.incrementBlockedCount();
-                        event.setResult(net.minecraftforge.fml.common.eventhandler.Event.Result.DENY);
+                        event.setResult(Event.Result.DENY);
                         return;
                     }
                 }
@@ -72,8 +77,21 @@ public class EventHandler {
                 }
                 
                 NoSlimeSuperflat.incrementBlockedCount();
-                event.setResult(net.minecraftforge.fml.common.eventhandler.Event.Result.DENY);
+                event.setResult(Event.Result.DENY);
             }
         }
+    }
+
+    // Helper method to check if world is superflat
+    private static boolean isSuperflatWorld(World world) {
+        if (world.isClientSide()) {
+            return false;
+        }
+        
+        if (world.getChunkSource() instanceof net.minecraft.world.server.ServerChunkProvider) {
+            return ((net.minecraft.world.server.ServerChunkProvider) world.getChunkSource()).generator 
+                instanceof net.minecraft.world.gen.FlatChunkGenerator;
+        }
+        return false;
     }
 }

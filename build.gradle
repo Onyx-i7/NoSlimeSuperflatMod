@@ -23,7 +23,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 
@@ -31,26 +31,46 @@ plugins {
     id 'java'
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'net.minecraftforge.gradle'
 
 // =============================================================================
 // MOD CONFIGURATION
 // =============================================================================
 
-version = "1.2.1"
+version = "1.3.0"
 group = "com.onyxi7.noslimesuperflat"
-archivesBaseName = "NoSlimeSuperflat-1.12.2"
+archivesBaseName = "NoSlimeSuperflat-1.16.5"
 
-// Java 8 compatibility for Minecraft 1.12.2
-sourceCompatibility = targetCompatibility = '1.8'
+// Java 8 compatibility for Minecraft 1.16.5
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 compileJava.options.encoding = 'UTF-8'
 
 minecraft {
-    version = "1.12.2-14.23.5.2847"
-    runDir = "run"
-    mappings = "snapshot_20171003"
-    makeObfSourceJar = false
-    useDepAts = true
+    mappings channel: 'official', version: '1.16.5'
+    
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                noslimesuperflat {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                noslimesuperflat {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
 // =============================================================================
@@ -78,8 +98,11 @@ repositories {
 // =============================================================================
 
 dependencies {
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.39'
     // No external dependencies - lightweight mod design
 }
+
+// ... código anterior ...
 
 // =============================================================================
 // RESOURCE PROCESSING
@@ -87,22 +110,9 @@ dependencies {
 
 processResources {
     inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-    inputs.property "modid", project.archivesBaseName.replace("-1.12.2", "")
-    inputs.property "modName", "No Slime Superflat"
-    inputs.property "description", "A lightweight, leak-free alternative to Collective for disabling slimes in Superflat worlds."
 
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        expand 'version': project.version,
-               'mcversion': project.minecraft.version,
-               'modid': project.archivesBaseName.replace("-1.12.2", ""),
-               'modName': 'No Slime Superflat',
-               'description': 'A lightweight, leak-free alternative to Collective for disabling slimes in Superflat worlds.'
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+    filesMatching('META-INF/mods.toml') {
+        expand 'version': project.version
     }
 }
 
@@ -112,15 +122,17 @@ processResources {
 
 jar {
     manifest {
-        attributes(
-            'FMLAT': 'noslimesuperflat_at.cfg',
-            'FMLCorePluginContainsFMLMod': 'true',
-            'ForceLoadAsMod': 'true',
-            'Specification-Version': project.version,
+        attributes([
+            'Specification-Title': 'noslimesuperflat',
+            'Specification-Vendor': 'onyxi7',
+            'Specification-Version': '1',
+            'Implementation-Title': project.name,
             'Implementation-Version': project.version,
+            'Implementation-Vendor': 'onyxi7',
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
             'Built-On': new Date().format('yyyy-MM-dd HH:mm:ss'),
             'Built-With': "Gradle ${gradle.gradleVersion}"
-        )
+        ])
     }
 }
 
@@ -134,9 +146,10 @@ build.dependsOn jar
 task verifyBuild {
     doLast {
         println "Build verification complete"
-        println "Mod ID: ${archivesBaseName}"
+        println "Mod ID: noslimesuperflat"
         println "Version: ${version}"
-        println "Minecraft: ${minecraft.version}"
+        println "Minecraft: 1.16.5"
+        println "Forge: 36.2.39"
     }
 }
 
