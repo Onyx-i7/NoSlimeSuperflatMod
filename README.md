@@ -3,7 +3,7 @@
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.12.2-green.svg)](https://minecraft.net)
+[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.12.2|1.16.5-green.svg)](https://minecraft.net)
 [![Version](https://img.shields.io/badge/Version-1.3-orange.svg)](https://github.com/onyx-i7/NoSlimeSuperflatMod/releases)
 <!-- [![Forge Version](https://img.shields.io/badge/Forge-14.23.5.2847-red.svg)](https://files.minecraftforge.net/) -->
 
@@ -51,8 +51,11 @@ This mod was created to address performance issues found in dependency-heavy sol
 ## Installation
 
 ### Requirements
-- Minecraft 1.12.2
+#### For 1.12.2
 - Forge 14.23.5.2847 or compatible
+
+#### For 1.16.5
+- Forge 36.2.30 or higher
 
 ### Steps
 1. Download the latest release from the [Releases](https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases) page
@@ -60,8 +63,7 @@ This mod was created to address performance issues found in dependency-heavy sol
 3. Launch Minecraft with Forge profile
 4. Verify installation in the Mods menu
 
-### Configuration
-
+### Configuration (Only for 1.12.2)
 The mod includes a runtime configuration accessible via:
 - File: `config/noslimesuperflat.cfg`
 
@@ -115,7 +117,7 @@ ls build/libs/NoSlimeSuperflat-1.12.2-*.jar
 
 For detailed build instructions, see [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md).
 
-## Project Structure
+## Project Structure (1.12.2)
 
 ```
 NoSlimeSuperflat/
@@ -215,10 +217,7 @@ Submit issues at: https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues
 ## Compatibility
 
 ### Known Compatible Mods
-- UniversalTweaks (redundant but compatible)
-- OptiFine
-- JourneyMap
-- JEI (Just Enough Items)
+- Everyone except a few
 
 ### Known Incompatible Mods
 - None reported
