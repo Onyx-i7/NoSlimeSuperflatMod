@@ -7,7 +7,9 @@
 [![Version](https://img.shields.io/badge/Version-1.3-orange.svg)](https://github.com/onyx-i7/NoSlimeSuperflatMod/releases)
 <!-- [![Forge Version](https://img.shields.io/badge/Forge-14.23.5.2847-red.svg)](https://files.minecraftforge.net/) -->
 
-A lightweight, memory-efficient Minecraft mod that prevents slimes from spawning in Superflat worlds. This mod serves as a lean alternative to Collective's "Superflat World No Slimes" module, specifically designed to eliminate memory leaks and reduce overhead.
+A lightweight, memory-efficient Minecraft mod that prevents slimes from spawning in Superflat worlds. This mod serves as a lean alternative to Collective's "Superflat World No Slimes" module, specifically designed to eliminate memory leaks and reduce overhead
+
+[Installation](#installation) • [Features](#features)
 
 </div>
 
@@ -94,7 +96,7 @@ Statistics include:
 ## Building from Source
 
 ### Prerequisites
-- Java 8 (required for ForgeGradle 2.3 compatibility)
+- Java 8 (required for ForgeGradle 2.3/5.1+ compatibility)
 - Git
 
 ### Build Instructions
