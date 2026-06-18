@@ -1,4 +1,6 @@
-# No Slime Superflat
+<h1 align="center">No Slime Superflat</h1>
+
+<div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.12.2-green.svg)](https://minecraft.net)
@@ -6,6 +8,8 @@
 <!-- [![Forge Version](https://img.shields.io/badge/Forge-14.23.5.2847-red.svg)](https://files.minecraftforge.net/) -->
 
 A lightweight, memory-efficient Minecraft mod that prevents slimes from spawning in Superflat worlds. This mod serves as a lean alternative to Collective's "Superflat World No Slimes" module, specifically designed to eliminate memory leaks and reduce overhead.
+
+</div>
 
 ## Overview
 
