@@ -216,3 +216,14 @@ If you encounter issues while porting:
 4. Ensure you are using the correct Java version for the target Minecraft version
 
 ### Version Compatibility Matrix
+| Minecraft Version | Java Version | ForgeGradle | Status      |
+|-------------------|--------------|-------------|-------------|
+| 1.10.2            | Java 8       | 2.3         | Untested    |
+| 1.11.2            | Java 8       | 2.3         | Untested    |
+| 1.12.2            | Java 8       | 2.3         | Supported   |
+| 1.13.2            | Java 8       | 3.4         | Not Planned |
+| 1.14.4            | Java 8       | 4.1         | Not Planned |
+| 1.15.2            | Java 8       | 4.2         | Not Planned |
+| 1.16.5            | Java 8       | 5.1+        | Supported   |
+| 1.17.1            | Java 16      | 5.x         | Not Planned |
+| 1.18.2+           | Java 17      | 5.x/6.x     | Planned     |
