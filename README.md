@@ -63,24 +63,6 @@ This mod was created to address performance issues found in dependency-heavy sol
 3. Launch Minecraft with Forge profile
 4. Verify installation in the Mods menu
 
-### Configuration (Only for 1.12.2)
-The mod includes a runtime configuration accessible via:
-- File: `config/noslimesuperflat.cfg`
-
-Press `Esc` -> `Mods` -> `No Slime Superflat` -> `Config` to access:
-
-- **General**: Toggle prevention and debug logging.
-- **Blacklist**: Add custom Entity IDs (e.g., `twilightforest:swarm_spider`) to prevent them from spawning in Superflat.
-- **Performance**: Fine-tune AI reduction and despawn distances for maximum FPS on low-end PCs.
-
-#### Configuration Options
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `enableDebugLogging` | false | Logs blocked spawn attempts (debugging only) |
-| `useOptimizedSpawnChecking` | true | Uses optimized spawn checking algorithm |
-| `cacheWorldTypeChecks` | true | Caches world type checks for better performance |
-
 ### Commands
 
 The mod includes a built-in command system:
@@ -112,29 +94,22 @@ cd NoSlimeSuperflatMod
 ./gradlew build
 
 # Output location
-ls build/libs/NoSlimeSuperflat-1.12.2-*.jar
+ls build/libs/NoSlimeSuperflat-1.16.5-*.jar
 ```
 
 For detailed build instructions, see [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md).
 
-## Project Structure (1.12.2)
+## Project Structure
 
 ```
 NoSlimeSuperflat/
 ├── src/main/java/com/onyxi7/noslimesuperflat/
 │   ├── NoSlimeSuperflat.java    # Main mod class with configuration
 │   ├── EventHandler.java        # Slime spawn event handler + command system
-│   ├── ConfigGui.java           # Runtime configuration GUI
-│   ├── ConfigGuiFactory.java    # GUI factory for Forge integration
-│   ├── CommonProxy.java         # Server-side proxy
-│   └── ClientProxy.java         # Client-side proxy
-├── src/main/resources/
-│   ├── mcmod.info               # Mod metadata
-│   └── noslimesuperflat_at.cfg  # Access transformers
+├── src/main/resources/META-INF
+│   ├── mods.toml                # Mod metadata
 ├── build.gradle                 # Build configuration
 ├── README.md                    # This file
-├── CHANGELOG.md                 # Version history and changes
-├── IMPROVEMENTS.md              # Technical improvements documentation
 └── LICENSE                      # MIT License
 ```
 
