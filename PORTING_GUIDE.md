@@ -180,13 +180,55 @@ ForgeConfigSpec spec = builder.build();
 ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, spec);
 ```
 
-<div align="center">
+#### Patch: Command Registration
+**1.12.2**:
+```java
+public class MyCommand extends CommandBase {
+    @Override
+    public String getName() { return "mycommand"; }
+    @Override
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) { }
+}
+// Register in FMLServerStartingEvent
+event.registerServerCommand(new MyCommand());
+```
+**1.16.5**:
+```java
+public static void register(CommandDispatcher<CommandSource> dispatcher) {
+    dispatcher.register(
+        LiteralArgumentBuilder.<CommandSource>literal("mycommand")
+            .requires(source -> source.hasPermission(2))
+            .executes(context -> {
+                // Command logic
+                return 1;
+            })
+    );
+}
+// Register in RegisterCommandsEvent on Forge Bus
+MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
+```
 
-### ⚠️ THIS SECTION IS STILL IN PROGRESS ​🛠️​​
-
-</div>
-
-
+#### Patch: Entity Class Names
+**1.12.2**:
+```java
+net.minecraft.entity.monster.EntitySlime
+net.minecraft.entity.EntityList.getKey(entity)
+```
+**1.16.5**:
+```java
+net.minecraft.entity.monster.SlimeEntity
+net.minecraftforge.registries.ForgeRegistries.ENTITIES.getKey(entity.getType())
+```
+#### Patch: Resource Location
+**1.12.2**:
+```java
+mcmod.info (JSON format in resources root)
+```
+**1.16.5**:
+```java
+META-INF/mods.toml (TOML format)
+```
+**Important**: Do not use `logoFile=""` (empty string) in mods.toml as it causes crashes when Forge tries to verify the file existence.
 
 ### Testing Checklist
 After porting:
