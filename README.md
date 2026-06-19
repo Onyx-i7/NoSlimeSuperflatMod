@@ -161,19 +161,6 @@ See [PORTING_GUIDE.md](PORTING_GUIDE.md) for detailed instructions.
 - JAR file not in mods folder
 - Mod ID conflict
 
-**Solution:** Check logs at `logs/latest.log` for errors
-
-#### Slimes Still Spawning
-**Causes:**
-- Configuration disabled
-- World not actually Superflat
-- Conflict with another mod
-
-**Solution:** 
-1. Verify `enableSlimePrevention=true` in config
-2. Confirm world type with `/gamerule` commands
-3. Test with minimal mod set
-
 ### Reporting Issues
 
 Before reporting an issue:
@@ -201,20 +188,9 @@ Submit issues at: https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues
 - Any mod that modifies slime spawn mechanics
 - Other "no slime" mods (use only one)
 
-## Credits
-
-- **Onyx_i7**: Original author and developer
-- **Serilum**: Inspiration from "Superflat World No Slimes"
-- **MinecraftForge Team**: Forge development
-- **MCP Team**: Mapping data
-
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Disclaimer
-
-This mod is not affiliated with Mojang Studios or Microsoft. Minecraft is a trademark of Mojang Synergies AB.
 
 ---
 
