@@ -5,7 +5,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.12.2|1.16.5-green.svg)](https://minecraft.net)
 [![Version](https://img.shields.io/badge/Version-1.3-orange.svg)](https://github.com/onyx-i7/NoSlimeSuperflatMod/releases)
-<!-- [![Forge Version](https://img.shields.io/badge/Forge-14.23.5.2847-red.svg)](https://files.minecraftforge.net/) -->
 
 A lightweight, memory-efficient Minecraft mod that prevents slimes from spawning in Superflat worlds. This mod serves as a lean alternative to Collective's "Superflat World No Slimes" module, specifically designed to eliminate memory leaks and reduce overhead
 
@@ -16,8 +15,6 @@ A lightweight, memory-efficient Minecraft mod that prevents slimes from spawning
 ## Overview
 
 This mod was created to address performance issues found in dependency-heavy solutions like Collective, which contains memory leaks in version 1.12.2. No Slime Superflat provides the same functionality with zero memory leaks and negligible performance impact.
-
-**Note:** If you are already using UniversalTweaks, this mod is redundant as UniversalTweaks includes the same fix.
 
 ## Features
 
@@ -46,7 +43,6 @@ This mod was created to address performance issues found in dependency-heavy sol
 |-----|------------------|--------------|--------------|
 | No Slime Superflat | ~50KB | None | None |
 | Collective | ~2MB+ | Multiple | Yes (1.12.2) |
-| UniversalTweaks | ~500KB | None | None |
 
 ## Installation
 
@@ -64,6 +60,7 @@ This mod was created to address performance issues found in dependency-heavy sol
 4. Verify installation in the Mods menu
 
 ### Commands
+> The commands will be removed as my goal is to optimize it to the maximum and update to almost all versions (1.13+)
 
 The mod includes a built-in command system:
 
@@ -145,15 +142,11 @@ To port this mod to other Minecraft versions:
 
 3. Test thoroughly in target version
 
-See [PORTING_GUIDE.md](PORTING_GUIDE.md) for detailed instructions.
+See [PORTING_GUIDE.md](PORTING_GUIDE.md) for detailed and updated instructions.
 
 ## Troubleshooting
 
 ### Common Issues
-
-#### Build Fails with Pack200 Error
-**Cause:** Using Java 11+ with ForgeGradle 2.3  
-**Solution:** Use Java 8 for building (see BUILD_INSTRUCTIONS.md)
 
 #### Mod Not Appearing in Game
 **Causes:**
@@ -179,14 +172,11 @@ Submit issues at: https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues
 ## Compatibility
 
 ### Known Compatible Mods
-- Everyone except a few
+- Everyone
 
 ### Known Incompatible Mods
-- None reported
+- All the ones that modify the spawning of slimes in superflat worlds are incompatible because they do the same thing.
 
-### Potential Conflicts
-- Any mod that modifies slime spawn mechanics
-- Other "no slime" mods (use only one)
 
 ## License
 
