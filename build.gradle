@@ -1,156 +1,50 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { 
-            name = "Forge Maven"
-            url = "https://maven.minecraftforge.net/" 
-        }
-        maven { 
-            name = "Files Minecraft"
-            url = "https://files.minecraftforge.net/maven" 
-        }
-        maven { 
-            name = "Architectury"
-            url = "https://maven.architectury.dev/" 
-        }
-        maven { 
-            name = "Minecraft Libraries"
-            url = "https://libraries.minecraft.net/" 
-        }
-        maven { 
-            name = "SpongePowered"
-            url = "https://repo.spongepowered.org/maven/" 
-        }
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    }
-}
-
 plugins {
+    id 'fabric-loom' version '1.7-SNAPSHOT'
     id 'java'
 }
 
-apply plugin: 'net.minecraftforge.gradle'
+version = project.mod_version
+group = project.maven_group
 
-// =============================================================================
-// MOD CONFIGURATION
-// =============================================================================
-
-version = "1.3.0"
-group = "com.onyxi7.noslimesuperflat"
-archivesBaseName = "NoSlimeSuperflat-1.16.5"
-
-// Java 8 compatibility for Minecraft 1.16.5
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
-compileJava.options.encoding = 'UTF-8'
-
-minecraft {
-    mappings channel: 'official', version: '1.16.5'
-    
-    runs {
-        client {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                noslimesuperflat {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                noslimesuperflat {
-                    source sourceSets.main
-                }
-            }
-        }
-    }
+base {
+    archivesName = project.archives_base_name
 }
 
-// =============================================================================
-// REPOSITORIES
-// =============================================================================
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 repositories {
     mavenCentral()
-    maven { 
-        name = "Forge Maven"
-        url = "https://maven.minecraftforge.net/" 
-    }
-    maven { 
-        name = "Files Minecraft"
-        url = "https://files.minecraftforge.net/maven" 
-    }
-    maven { 
-        name = "Architectury"
-        url = "https://maven.architectury.dev/" 
-    }
 }
-
-// =============================================================================
-// DEPENDENCIES
-// =============================================================================
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.39'
-    // No external dependencies - lightweight mod design
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+    
+    modImplementation "net.fabricmc:fabric-loader:0.16.0"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.102.0+1.21.1"
 }
 
-// ... código anterior ...
+loom {
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+        }
+    }
+}
 
-// =============================================================================
-// RESOURCE PROCESSING
-// =============================================================================
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archives_base_name}" }
+    }
+}
 
 processResources {
     inputs.property "version", project.version
-
-    filesMatching('META-INF/mods.toml') {
-        expand 'version': project.version
+    
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
     }
 }
-
-// =============================================================================
-// JAR CONFIGURATION
-// =============================================================================
-
-jar {
-    manifest {
-        attributes([
-            'Specification-Title': 'noslimesuperflat',
-            'Specification-Vendor': 'onyxi7',
-            'Specification-Version': '1',
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
-            'Implementation-Vendor': 'onyxi7',
-            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            'Built-On': new Date().format('yyyy-MM-dd HH:mm:ss'),
-            'Built-With': "Gradle ${gradle.gradleVersion}"
-        ])
-    }
-}
-
-// =============================================================================
-// BUILD TASKS
-// =============================================================================
-
-build.dependsOn jar
-
-// Custom task to verify build outputs
-task verifyBuild {
-    doLast {
-        println "Build verification complete"
-        println "Mod ID: noslimesuperflat"
-        println "Version: ${version}"
-        println "Minecraft: 1.16.5"
-        println "Forge: 36.2.39"
-    }
-}
-
-build.finalizedBy verifyBuild

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "noslimesuperflat",
+  "version": "${version}",
+  "name": "No Slime Superflat",
+  "description": "A lightweight, memory-efficient mod that prevents slimes from spawning in Superflat worlds",
+  "authors": [
+    "Onyx_i7"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Onyx-i7/NoSlimeSuperflatMod",
+    "sources": "https://github.com/Onyx-i7/NoSlimeSuperflatMod",
+    "issues": "https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.onyxi7.noslimesuperflat.NoSlimeSuperflat"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
