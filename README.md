@@ -105,7 +105,7 @@ For detailed build instructions, see [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.
 NoSlimeSuperflat/
 ├── src/main/java/com/onyxi7/noslimesuperflat/
 │   ├── NoSlimeSuperflat.java    # Main mod class with configuration
-│   ├── EventHandler.java        # Slime spawn event handler + command system
+│   ├── EventHandler.java        # Slime spawn event handler
 ├── src/main/resources/META-INF
 │   ├── mods.toml                # Mod metadata
 ├── build.gradle                 # Build configuration
