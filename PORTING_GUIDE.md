@@ -245,6 +245,7 @@ After porting:
 ### Resources
 - [Minecraft Forge Documentation](https://docs.minecraftforge.net/en/1.21.x/)
 - [MCP Mappings](http://www.modcoderpack.com/)
+- [Fabric Documentation](https://docs.fabricmc.net/)
 - [Forge Files Archive](https://files.minecraftforge.net/net/minecraftforge/forge/)
 - [ForgeGradle Repository](https://github.com/MinecraftForge/ForgeGradle)
 - [Minecraft Wiki - Tutorials](https://minecraft.wiki/w/Tutorials)
@@ -268,4 +269,7 @@ If you encounter issues while porting:
 | 1.15.2            | Java 8       | 4.2         | Not Planned |
 | 1.16.5            | Java 8       | 5.1+        | Supported   |
 | 1.17.1            | Java 16      | 5.x         | Not Planned |
-| 1.18.2+           | Java 17      | 5.x/6.x     | Planned     |
+| 1.18.2            | Java 17      | 5.x/6.x     | Not Planned |
+| 1.21.1            | Java 21      | Fabric 1.7  | Supported   |
+| 1.21+             | Java 21      | Fabric 1.7  | Untested    |
+| 26.1/26.2         | Java 25      | Fabric 1.7  | Planned     |
