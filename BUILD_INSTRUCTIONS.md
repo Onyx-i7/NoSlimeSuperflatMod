@@ -1,6 +1,7 @@
 <div align="center">
 
-# ⚠️ THIS SECTION IS STILL IN PROGRESS ​🛠️​​
+# ⚠️THIS DOCUMENTATION IS STILL IN PROGRESS​⚠️​
+**It's outdated but still works for previous versions**
 
 </div>
 
