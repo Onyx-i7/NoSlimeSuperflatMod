@@ -23,7 +23,7 @@ This mod was created to address performance issues found in dependency-heavy sol
 - **Runtime Configuration**: Enable/disable slime prevention without restarting
 - **Lightweight**: Approximately 50KB memory footprint
 - **Easy to Port**: Clean codebase with patch-friendly architecture for version migration
-- **No Dependencies**: Standalone mod requiring only Forge
+- **No Dependencies**: Standalone mod requiring only Forge or Fabric
 
 ## Performance Analysis
 
