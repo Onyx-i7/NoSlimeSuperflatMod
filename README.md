@@ -3,10 +3,10 @@
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.12.2|1.16.5|1.21.1-green.svg)](https://minecraft.net)
+[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.12|1.16|1.21|26.1-green.svg)](https://minecraft.net)
 [![Version](https://img.shields.io/badge/Version-1.4-orange.svg)](https://github.com/onyx-i7/NoSlimeSuperflatMod/releases)
 
-A lightweight, memory-efficient Minecraft mod that prevents slimes from spawning in Superflat worlds. This mod serves as a lean alternative to Collective's "Superflat World No Slimes" module, specifically designed to eliminate memory leaks and reduce overhead
+A lightweight, memory-efficient Minecraft mod that prevents slimes from spawning in Superflat worlds. This mod serves as a lean alternative to Collective's "Superflat World No Slimes" mod, specifically designed to eliminate memory leaks and reduce overhead
 
 [Installation](#installation) • [Features](#features)
 
@@ -42,7 +42,7 @@ This mod was created to address performance issues found in dependency-heavy sol
 | Mod | Memory Footprint | Dependencies | Memory Leaks |
 |-----|------------------|--------------|--------------|
 | No Slime Superflat | ~50KB | None | None |
-| Collective | ~2MB+ | Multiple | Yes (1.12.2) |
+| Superflat World No Slimes | ~2MB+ | Multiple | Yes (1.12.2) |
 
 ## Installation
 
@@ -77,7 +77,7 @@ Statistics include:
 ## Building from Source
 
 ### Prerequisites
-- Java 8 (required for ForgeGradle 2.3/5.1+ compatibility)
+- Java 8 (required for compatibility with ForgeGradle 2.3/5.1+) or for versions greater than 1.21 Java 21/Java 25
 - Git
 
 ### Build Instructions
@@ -91,7 +91,7 @@ cd NoSlimeSuperflatMod
 ./gradlew build
 
 # Output location
-ls build/libs/NoSlimeSuperflat-1.16.5-*.jar
+ls build/libs/NoSlimeSuperflat-*.jar
 ```
 
 For detailed build instructions, see [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md).
@@ -186,4 +186,6 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 **Repository:** https://github.com/Onyx-i7/NoSlimeSuperflatMod  
 **Issues:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues  
-**Releases:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases
+**Releases:** https://github.com/Onyx-i7/NoSlimeSuperflatMod/releases  
+**Modrinth:** https://modrinth.com/mod/no-superflat-slimes  
+**CurseForge:** https://www.curseforge.com/minecraft/mc-mods/nosuperflatslimes
