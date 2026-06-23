@@ -1,36 +1,27 @@
 package com.onyxi7.noslimesuperflat;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
-import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.level.levelgen.FlatLevelSource;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.cubemob.Slime;
+import net.minecraft.world.level.Level;
 
 public class FabricEventHandler {
     
     public static void register() {
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
-            if (!(entity instanceof Slime slime)) {
-                return;
-            }
-
             if (world.isClientSide()) {
                 return;
             }
 
-            if (slime.isPersistenceRequired()) {
+            if (!(entity instanceof Slime)) {
                 return;
             }
 
-            if (isSuperflatWorld(world)) {
+            ServerLevel serverWorld = (ServerLevel) world;
+            if (serverWorld.getServer().getWorldData().isFlatWorld()) {
                 entity.discard();
             }
         });
-    }
-
-    private static boolean isSuperflatWorld(net.minecraft.world.level.Level world) {
-        if (world.getChunkSource() instanceof ServerChunkCache chunkCache) {
-            return chunkCache.getGenerator() instanceof FlatLevelSource;
-        }
-        return false;
     }
 }
