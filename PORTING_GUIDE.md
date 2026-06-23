@@ -271,5 +271,5 @@ If you encounter issues while porting:
 | 1.17.1            | Java 16      | 5.x         | Not Planned |
 | 1.18.2            | Java 17      | 5.x/6.x     | Not Planned |
 | 1.21.1            | Java 21      | Fabric 1.7  | Supported   |
-| 1.21+             | Java 21      | Fabric 1.7  | Untested    |
-| 26.1/26.2         | Java 25      | Fabric 1.7  | Planned     |
+| 1.21.1+           | Java 21      | Fabric 1.7  | Possibly    |
+| 26.1/26.2         | Java 25      | Fabric 1.17 | Supported   |
