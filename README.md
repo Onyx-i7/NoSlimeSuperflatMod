@@ -39,10 +39,10 @@ This mod was created to address performance issues found in dependency-heavy sol
 
 ### Comparison with Alternatives
 
-| Mod | Memory Footprint | Dependencies | Memory Leaks |
-|-----|------------------|--------------|--------------|
-| No Slime Superflat | ~50KB | None | None |
-| Superflat World No Slimes | ~2MB+ | Multiple | Yes (1.12.2) |
+| Mod | Memory | Dependencies | Leaks | Rating |
+|-----|--------|--------------|-------|--------|
+| **No Slime Superflat** | ~50KB | None | None | ⭐⭐⭐⭐⭐ |
+| Superflat World No Slimes | ~2MB+ | Multiple | Yes | ⭐⭐ |
 
 ## Installation
 
@@ -171,11 +171,11 @@ Submit issues at: https://github.com/Onyx-i7/NoSlimeSuperflatMod/issues
 
 ## Compatibility
 
-### Known Compatible Mods
-- Everyone
+### ✅ Works with EVERYTHING
+This mod is completely standalone and doesn't conflict with other mods
 
-### Known Incompatible Mods
-- All the ones that modify the spawning of slimes in superflat worlds are incompatible because they do the same thing.
+### ⚠️ Incompatible with:
+- Any mod that modifies slime spawning in superflat worlds (they do the same thing)
 
 
 ## License
