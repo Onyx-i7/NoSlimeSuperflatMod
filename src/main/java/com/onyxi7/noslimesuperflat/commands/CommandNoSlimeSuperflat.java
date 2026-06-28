@@ -6,6 +6,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +26,7 @@ public class CommandNoSlimeSuperflat extends CommandBase {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length < 1) {
-            sender.sendMessage(new TextComponentString("§6[NoSlimeSuperflat] §eUsage: /noslimesuperflat <stats|reload>"));
+            sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "[NoSlimeSuperflat] " + TextFormatting.YELLOW + "Usage: /noslimesuperflat <stats|reload>"));
             return;
         }
 
@@ -36,7 +37,7 @@ public class CommandNoSlimeSuperflat extends CommandBase {
         } else if ("reload".equals(subCommand)) {
             reloadConfig(sender);
         } else {
-            sender.sendMessage(new TextComponentString("§c[NoSlimeSuperflat] Unknown command. Use: /noslimesuperflat <stats|reload>"));
+            sender.sendMessage(new TextComponentString(TextFormatting.RED + "[NoSlimeSuperflat] Unknown command. Use: /noslimesuperflat <stats|reload>"));
         }
     }
 
@@ -44,28 +45,46 @@ public class CommandNoSlimeSuperflat extends CommandBase {
         long blockedCount = NoSlimeSuperflat.getBlockedSlimeCount();
         long checkCount = NoSlimeSuperflat.getSpawnCheckCount();
         
-        sender.sendMessage(new TextComponentString("§6--- No Slime Superflat Statistics ---"));
-        sender.sendMessage(new TextComponentString("§eTotal Spawn Checks: §f" + checkCount));
-        sender.sendMessage(new TextComponentString("§eSlimes Blocked: §f" + blockedCount));
+        sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "--- No Slime Superflat Statistics ---"));
+        sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Total Spawn Checks: " + TextFormatting.WHITE + checkCount));
+        sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Slimes Blocked: " + TextFormatting.WHITE + blockedCount));
         
         if (checkCount > 0) {
             double efficiency = ((double) blockedCount / checkCount) * 100.0;
-            sender.sendMessage(new TextComponentString(String.format("§eBlock Efficiency: §f%.2f%%", efficiency)));
+            sender.sendMessage(new TextComponentString(String.format(TextFormatting.YELLOW + "Block Efficiency: " + TextFormatting.WHITE + "%.2f%%", efficiency)));
         }
         
-        sender.sendMessage(new TextComponentString("§eOptimized Checking: §f" + NoSlimeSuperflat.useOptimizedSpawnChecking));
-        sender.sendMessage(new TextComponentString("§eWorld Caching: §f" + NoSlimeSuperflat.cacheWorldTypeChecks));
+        sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "--- Current Configuration ---"));
+        sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Prevention Active: " + TextFormatting.WHITE + NoSlimeSuperflat.enableSlimePrevention));
+        sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Block Magma Cubes: " + TextFormatting.WHITE + NoSlimeSuperflat.blockMagmaCubes));
+        sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "World Caching: " + TextFormatting.WHITE + NoSlimeSuperflat.cacheWorldTypeChecks));
+        sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Block Only Underground: " + TextFormatting.WHITE + NoSlimeSuperflat.blockOnlyUnderground));
+        
+        if (NoSlimeSuperflat.blockOnlyUnderground) {
+            sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Max Y for Spawn: " + TextFormatting.WHITE + NoSlimeSuperflat.maxYForSpawn));
+        }
+        
+        sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Allow Surface Spawns: " + TextFormatting.WHITE + NoSlimeSuperflat.allowSurfaceSpawns));
+        sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Blacklisted Entities: " + TextFormatting.WHITE + NoSlimeSuperflat.entityBlacklist.size()));
+        
+        if (NoSlimeSuperflat.enableDebugLogging) {
+            sender.sendMessage(new TextComponentString(TextFormatting.AQUA + "Debug Logging: ENABLED"));
+        }
     }
 
     private void reloadConfig(ICommandSender sender) {
         try {
             NoSlimeSuperflat.reloadConfig();
-            sender.sendMessage(new TextComponentString("§a[NoSlimeSuperflat] Configuration reloaded successfully!"));
-            sender.sendMessage(new TextComponentString("§ePrevention Active: §f" + NoSlimeSuperflat.enableSlimePrevention));
-            sender.sendMessage(new TextComponentString("§eBlacklist Size: §f" + NoSlimeSuperflat.entityBlacklist.size()));
+            sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "[NoSlimeSuperflat] Configuration reloaded successfully!"));
+            sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Prevention Active: " + TextFormatting.WHITE + NoSlimeSuperflat.enableSlimePrevention));
+            sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Blacklisted Entities: " + TextFormatting.WHITE + NoSlimeSuperflat.entityBlacklist.size()));
+            
+            if (NoSlimeSuperflat.blockOnlyUnderground) {
+                sender.sendMessage(new TextComponentString(TextFormatting.YELLOW + "Blocking slimes below Y: " + TextFormatting.WHITE + NoSlimeSuperflat.maxYForSpawn));
+            }
         } catch (Exception e) {
             NoSlimeSuperflat.logger.error("Failed to reload config via command", e);
-            sender.sendMessage(new TextComponentString("§c[NoSlimeSuperflat] Error reloading configuration. Check logs."));
+            sender.sendMessage(new TextComponentString(TextFormatting.RED + "[NoSlimeSuperflat] Error reloading configuration. Check logs."));
         }
     }
 

@@ -18,9 +18,9 @@ public class ConfigGui extends GuiConfig {
     private static List<IConfigElement> getConfigElements() {
         List<IConfigElement> list = new ArrayList<>();
         
-        // Add categories dynamically based on what exists in Config
         list.add(new ConfigElement(NoSlimeSuperflat.config.getCategory("general")));
-        list.add(new ConfigElement(NoSlimeSuperflat.config.getCategory("performance")));
+        list.add(new ConfigElement(NoSlimeSuperflat.config.getCategory("spawn_control")));
+        list.add(new ConfigElement(NoSlimeSuperflat.config.getCategory("entities")));
         
         return list;
     }

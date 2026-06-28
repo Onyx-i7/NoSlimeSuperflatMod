@@ -1,56 +1,41 @@
 buildscript {
     repositories {
+        maven {
+            name = 'GTNH Maven'
+            url = 'https://nexus.gtnewhorizons.com/repository/public/'
+        }
         mavenCentral()
-        maven { 
-            name = "Forge Maven"
-            url = "https://maven.minecraftforge.net/" 
-        }
-        maven { 
-            name = "Files Minecraft"
-            url = "https://files.minecraftforge.net/maven" 
-        }
-        maven { 
-            name = "Architectury"
-            url = "https://maven.architectury.dev/" 
-        }
-        maven { 
-            name = "Minecraft Libraries"
-            url = "https://libraries.minecraft.net/" 
-        }
-        maven { 
-            name = "SpongePowered"
-            url = "https://repo.spongepowered.org/maven/" 
-        }
+        gradlePluginPortal()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'com.gtnewhorizons:retrofuturagradle:2.0.2'
     }
 }
 
-plugins {
-    id 'java'
-}
-
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'com.gtnewhorizons.retrofuturagradle'
 
 // =============================================================================
 // MOD CONFIGURATION
 // =============================================================================
 
-version = "1.2.1"
+version = "1.4.2"
 group = "com.onyxi7.noslimesuperflat"
-archivesBaseName = "NoSlimeSuperflat-1.12.2"
 
-// Java 8 compatibility for Minecraft 1.12.2
-sourceCompatibility = targetCompatibility = '1.8'
-compileJava.options.encoding = 'UTF-8'
+// Gradle 9 syntax
+base {
+    archivesName = 'NoSlimeSuperflat-1.12.2'
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(8))
+}
 
 minecraft {
-    version = "1.12.2-14.23.5.2847"
-    runDir = "run"
-    mappings = "snapshot_20171003"
-    makeObfSourceJar = false
-    useDepAts = true
+    mcVersion = '1.12.2'
+    username = 'Developer'
 }
 
 // =============================================================================
@@ -59,17 +44,9 @@ minecraft {
 
 repositories {
     mavenCentral()
-    maven { 
-        name = "Forge Maven"
-        url = "https://maven.minecraftforge.net/" 
-    }
-    maven { 
-        name = "Files Minecraft"
-        url = "https://files.minecraftforge.net/maven" 
-    }
-    maven { 
-        name = "Architectury"
-        url = "https://maven.architectury.dev/" 
+    maven {
+        name = 'CurseForge'
+        url = 'https://www.cursemaven.com'
     }
 }
 
@@ -79,30 +56,27 @@ repositories {
 
 dependencies {
     // No external dependencies - lightweight mod design
+    // If you need add dependencies in the future, use:
+    // implementation rfg.deobf('curse.maven:modid-projectid:fileid')
+    // compileOnly rfg.deobf('curse.maven:modid-projectid:fileid')
 }
 
 // =============================================================================
 // RESOURCE PROCESSING
 // =============================================================================
 
-processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-    inputs.property "modid", project.archivesBaseName.replace("-1.12.2", "")
-    inputs.property "modName", "No Slime Superflat"
-    inputs.property "description", "A lightweight, leak-free alternative to Collective for disabling slimes in Superflat worlds."
+tasks.named('processResources', ProcessResources).configure {
+    def replaceProperties = [
+        version: project.version,
+        mcversion: project.minecraft.mcVersion,
+        modid: 'noslimesuperflat',
+        modName: 'No Slime Superflat',
+        description: 'A lightweight, leak-free alternative to Collective for disabling slimes in Superflat worlds.'
+    ]
+    inputs.properties replaceProperties
 
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        expand 'version': project.version,
-               'mcversion': project.minecraft.version,
-               'modid': project.archivesBaseName.replace("-1.12.2", ""),
-               'modName': 'No Slime Superflat',
-               'description': 'A lightweight, leak-free alternative to Collective for disabling slimes in Superflat worlds.'
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+    filesMatching(['mcmod.info', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
     }
 }
 
@@ -110,9 +84,9 @@ processResources {
 // JAR CONFIGURATION
 // =============================================================================
 
-jar {
+tasks.named('jar', Jar).configure {
     manifest {
-        attributes(
+        attributes([
             'FMLAT': 'noslimesuperflat_at.cfg',
             'FMLCorePluginContainsFMLMod': 'true',
             'ForceLoadAsMod': 'true',
@@ -120,7 +94,7 @@ jar {
             'Implementation-Version': project.version,
             'Built-On': new Date().format('yyyy-MM-dd HH:mm:ss'),
             'Built-With': "Gradle ${gradle.gradleVersion}"
-        )
+        ])
     }
 }
 
@@ -131,13 +105,39 @@ jar {
 build.dependsOn jar
 
 // Custom task to verify build outputs
-task verifyBuild {
+tasks.register('verifyBuild') {
     doLast {
+        println "============================================="
         println "Build verification complete"
-        println "Mod ID: ${archivesBaseName}"
+        println "============================================="
+        println "Mod ID: noslimesuperflat"
         println "Version: ${version}"
-        println "Minecraft: ${minecraft.version}"
+        println "Minecraft: ${minecraft.mcVersion}"
+        println "Output: build/libs/${base.archivesName.get()}-${version}.jar"
+        println "============================================="
     }
 }
 
 build.finalizedBy verifyBuild
+
+// =============================================================================
+// IDE CONFIGURATION
+// =============================================================================
+
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+}
+
+// =============================================================================
+// ADDITIONAL TASKS
+// =============================================================================
+
+// Task to generate development environment
+tasks.register('setupDevEnvironment') {
+    doLast {
+        println "Setting up development environment..."
+        println "Run './gradlew setupDecompWorkspace' if needed"
+    }
+}
