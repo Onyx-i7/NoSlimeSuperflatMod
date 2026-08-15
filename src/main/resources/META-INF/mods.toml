@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="MIT"
+
+[[mods]]
+modId="noslimesuperflat"
+version="${version}"
+displayName="No Slime Superflat"
+description='''
+A lightweight, memory-efficient mod that prevents slimes from spawning in Superflat worlds
+'''
+
+[[dependencies.noslimesuperflat]]
+modId="forge"
+mandatory=false
+versionRange="[36,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.noslimesuperflat]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.8,)"
+ordering="NONE"
+side="BOTH"
