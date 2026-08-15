@@ -1,6 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
-    id 'maven-publish'
+    id 'java'
 }
 
 version = project.mod_version
@@ -10,48 +9,48 @@ base {
     archivesName = project.archives_base_name
 }
 
-repositories {
-    //
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
-loom {
-    splitEnvironmentSourceSets()
-    
-    mods {
-        "noslimesuperflat" {
-            sourceSet sourceSets.main
-        }
-    }
+repositories {
+    mavenCentral()
+    maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
+    maven { url = "https://maven.fabricmc.net/" }
+    maven { url = "https://maven.neoforged.net/releases/" }
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-}
-
-processResources {
-    def version = project.version
-    inputs.property "version", version
-    filesMatching("fabric.mod.json") {
-        expand "version": version
-    }
+    compileOnly 'org.spongepowered:mixin:0.8.5'
+    compileOnly 'org.ow2.asm:asm-tree:9.7'
+    
+    compileOnly 'net.fabricmc:fabric-loader:0.16.9'
+    
+    compileOnly 'org.jetbrains:annotations:24.1.0'
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 25
-}
-
-java {
-    withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    options.encoding = 'UTF-8'
 }
 
 jar {
-    def projectName = project.name
-    inputs.property "projectName", projectName
     from("LICENSE") {
-        rename { "${it}_${projectName}" }
+        rename { "${it}_${project.archivesName}" }
+    }
+    
+    exclude 'net/**'
+    exclude 'org/**'
+    
+    manifest {
+        attributes(
+            'MixinConfigs': 'noslimesuperflat.mixins.json',
+            'FMLCorePlugin': 'com.onyxi7.noslimesuperflat.platform.CorePlugin',
+            'FMLCorePluginContainsFMLMod': 'true',
+            'ForceLoadAsMod': 'true'
+        )
     }
 }
