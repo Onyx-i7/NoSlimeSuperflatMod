@@ -25,11 +25,14 @@ repositories {
 }
 
 dependencies {
+    // Mixin and ASM (for compiling mixins)
     compileOnly 'org.spongepowered:mixin:0.8.5'
     compileOnly 'org.ow2.asm:asm-tree:9.7'
     
+    // Fabric Loader (for compilation)
     compileOnly 'net.fabricmc:fabric-loader:0.16.9'
     
+    // Annotations
     compileOnly 'org.jetbrains:annotations:24.1.0'
 }
 
@@ -39,9 +42,11 @@ tasks.withType(JavaCompile).configureEach {
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${project.archivesName}" }
+        // Fixed for Gradle 9+: use archives_base_name directly from gradle.properties
+        rename { "${it}_${project.archives_base_name}" }
     }
     
+    // Exclude Minecraft stub classes
     exclude 'net/**'
     exclude 'org/**'
     
@@ -53,4 +58,14 @@ jar {
             'ForceLoadAsMod': 'true'
         )
     }
+}
+
+// Generate sources JAR
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
 }
