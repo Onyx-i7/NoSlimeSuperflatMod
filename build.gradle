@@ -52,18 +52,9 @@ jar {
     exclude 'org/**'
     exclude 'com/onyxi7/noslimesuperflat/compile/**'
     
-    // Include mcmod.info and mods.toml
-    from('src/main/resources') {
-        include 'mcmod.info'
-        include 'META-INF/mods.toml'
-        include 'noslimesuperflat.mixins.json'
-        include 'fabric.mod.json'
-    }
-    
     manifest {
         attributes(
             'MixinConfigs': 'noslimesuperflat.mixins.json'
-            // Removed FMLCorePlugin - it was causing errors
         )
     }
 }
