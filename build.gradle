@@ -50,7 +50,6 @@ jar {
     // Exclude stub classes
     exclude 'net/**'
     exclude 'org/**'
-    exclude 'com/onyxi7/noslimesuperflat/compile/**'
     
     manifest {
         attributes(
