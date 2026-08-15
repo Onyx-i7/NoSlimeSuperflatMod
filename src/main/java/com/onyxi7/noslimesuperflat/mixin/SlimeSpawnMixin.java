@@ -65,9 +65,7 @@ public abstract class SlimeSpawnMixin {
     private void handleEntitySpawnVoid(Object entity, CallbackInfo ci) {
         try {
             if (shouldBlockEntity(entity)) {
-                // For void methods, we need to cancel and remove the entity
                 ci.cancel();
-                // Try to mark entity for removal
                 try {
                     entity.getClass().getMethod("setDead").invoke(entity);
                 } catch (Throwable ignored) {
@@ -77,7 +75,6 @@ public abstract class SlimeSpawnMixin {
                         // Entity will still spawn, but we tried
                     }
                 }
-
             }
         } catch (Throwable t) {
             // Silently ignore
@@ -91,15 +88,14 @@ public abstract class SlimeSpawnMixin {
             
             // List of all possible slime class names across versions
             boolean isSlime = 
-                entityClass.contains("Slime") ||                    // General check
-                entityClass.equals("net.minecraft.entity.monster.EntitySlime") ||  // 1.8-1.12 MCP
-                entityClass.equals("net.minecraft.entity.monster.SlimeEntity") ||  // 1.13-1.16 MCP
-                entityClass.equals("net.minecraft.world.entity.monster.Slime") ||  // 1.17+ Mojang
-                entityClass.equals("net.minecraft.class_1685") ||    // Fabric Intermediary
-                entityClass.equals("net.minecraft.entity.mob.SlimeEntity") ||      // Yarn
-                entityClass.contains("EntitySlime") ||               // Old versions
-                entityClass.contains(".bfn") ||                      // 1.8-1.12 SRG (obfuscated)
-                entityClass.endsWith("Slime");                       // Catch-all
+                entityClass.contains("Slime") ||
+                entityClass.equals("net.minecraft.entity.monster.EntitySlime") ||
+                entityClass.equals("net.minecraft.entity.monster.SlimeEntity") ||
+                entityClass.equals("net.minecraft.world.entity.monster.Slime") ||
+                entityClass.equals("net.minecraft.class_1685") ||
+                entityClass.equals("net.minecraft.entity.mob.SlimeEntity") ||
+                entityClass.contains("EntitySlime") ||
+                entityClass.endsWith("Slime");
             
             if (!isSlime) {
                 return false;
@@ -111,10 +107,6 @@ public abstract class SlimeSpawnMixin {
         } catch (Throwable t) {
             return false;
         }
-
-        debugLog("Checking entity: " + entity.getClass().getName());
-        debugLog("Is slime: " + isSlime);
-        debugLog("Is superflat: " + isSuperflatWorld(this));
     }
     
     private static boolean isSuperflatWorld(Object world) {
@@ -153,9 +145,4 @@ public abstract class SlimeSpawnMixin {
             }
         }
     }
-
-    private void debugLog(String message) {
-    try {
-        System.out.println("[NoSlimeSuperflat] " + message);
-    } catch (Throwable ignored) {}
 }
