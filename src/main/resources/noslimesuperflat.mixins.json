@@ -2,12 +2,11 @@
   "required": true,
   "minVersion": "0.8.5",
   "package": "com.onyxi7.noslimesuperflat.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "refmap": "noslimesuperflat.refmap.json",
+  "compatibilityLevel": "JAVA_8",
   "mixins": [
     "SlimeSpawnMixin"
   ],
   "injectors": {
-    "defaultRequire": 1
+    "defaultRequire": 0
   }
 }
