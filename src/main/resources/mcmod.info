@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "noslimesuperflat",
+    "name": "No Slime Superflat",
+    "description": "A lightweight, memory-efficient mod that prevents slimes from spawning in Superflat worlds",
+    "version": "${version}",
+    "mcversion": "[1.8,1.21]",
+    "url": "https://github.com/Onyx-i7/NoSlimeSuperflatMod",
+    "updateUrl": "",
+    "authorList": ["Onyx_i7"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
