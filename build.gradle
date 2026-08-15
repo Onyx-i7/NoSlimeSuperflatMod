@@ -47,17 +47,23 @@ jar {
         rename { "${it}_${project.archives_base_name}" }
     }
     
-    // Exclude ALL stub classes
+    // Exclude stub classes
     exclude 'net/**'
     exclude 'org/**'
     exclude 'com/onyxi7/noslimesuperflat/compile/**'
     
+    // Include mcmod.info and mods.toml
+    from('src/main/resources') {
+        include 'mcmod.info'
+        include 'META-INF/mods.toml'
+        include 'noslimesuperflat.mixins.json'
+        include 'fabric.mod.json'
+    }
+    
     manifest {
         attributes(
-            'MixinConfigs': 'noslimesuperflat.mixins.json',
-            'FMLCorePlugin': 'com.onyxi7.noslimesuperflat.platform.CorePlugin',
-            'FMLCorePluginContainsFMLMod': 'true',
-            'ForceLoadAsMod': 'true'
+            'MixinConfigs': 'noslimesuperflat.mixins.json'
+            // Removed FMLCorePlugin - it was causing errors
         )
     }
 }
