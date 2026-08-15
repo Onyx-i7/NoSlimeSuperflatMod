@@ -82,34 +82,55 @@ public abstract class SlimeSpawnMixin {
     
     private static boolean isSuperflatWorld(Object world) {
         try {
-            // Try modern method (1.17+)
-            Object server = world.getClass().getMethod("getServer").invoke(world);
-            Object worldData = server.getClass().getMethod("getWorldData").invoke(server);
-            return (Boolean) worldData.getClass().getMethod("isFlatWorld").invoke(worldData);
-        } catch (Throwable t1) {
+            // Try modern method (1.17+) - Mojang mappings
             try {
-                // Try old method (1.8-1.16)
-                Object worldInfo = world.getClass().getMethod("getWorldInfo").invoke(world);
-                
-                // Try getTerrainType() (1.8-1.12)
-                try {
-                    Object terrainType = worldInfo.getClass().getMethod("getTerrainType").invoke(worldInfo);
-                    String typeString = terrainType.toString();
-                    log("Terrain type: " + typeString);
-                    return typeString.contains("FLAT") || typeString.contains("flat");
-                } catch (Throwable t2) {
-                    // Try isFlatWorld() (1.13-1.16)
-                    try {
-                        return (Boolean) worldInfo.getClass().getMethod("isFlatWorld").invoke(worldInfo);
-                    } catch (Throwable t3) {
-                        logError("All world detection methods failed");
-                        return false;
-                    }
-                }
-            } catch (Throwable t5) {
-                logError("Failed to get WorldInfo: " + t5.getMessage());
-                return false;
+                Object server = world.getClass().getMethod("getServer").invoke(world);
+                Object worldData = server.getClass().getMethod("getWorldData").invoke(server);
+                return (Boolean) worldData.getClass().getMethod("isFlatWorld").invoke(worldData);
+            } catch (Throwable t1) {
+                // Ignore and try next method
             }
+            
+            // Try Forge 1.12.2 method - access worldInfo field directly
+            try {
+                // Get the worldInfo field from World class
+                java.lang.reflect.Field worldInfoField = world.getClass().getSuperclass().getDeclaredField("worldInfo");
+                worldInfoField.setAccessible(true);
+                Object worldInfo = worldInfoField.get(world);
+                
+                // Call getTerrainType() to get WorldType
+                Object terrainType = worldInfo.getClass().getMethod("getTerrainType").invoke(worldInfo);
+                
+                // Check if it's FLAT
+                String typeName = terrainType.toString();
+                if (typeName.contains("FLAT") || typeName.contains("flat")) {
+                    return true;
+                }
+                
+                // Also check the name directly
+                try {
+                    String name = (String) terrainType.getClass().getMethod("getName").invoke(terrainType);
+                    return name != null && name.toLowerCase().contains("flat");
+                } catch (Throwable ignored) {
+                    // Method might not exist
+                }
+                
+                return false;
+            } catch (Throwable t2) {
+                // Try alternative method for 1.13-1.16
+                try {
+                    java.lang.reflect.Field worldInfoField = world.getClass().getDeclaredField("worldInfo");
+                    worldInfoField.setAccessible(true);
+                    Object worldInfo = worldInfoField.get(world);
+                    return (Boolean) worldInfo.getClass().getMethod("isFlatWorld").invoke(worldInfo);
+                } catch (Throwable t3) {
+                    logError("Failed to detect world type: " + t3.getMessage());
+                    return false;
+                }
+            }
+        } catch (Throwable t) {
+            logError("Critical error in isSuperflatWorld: " + t.getMessage());
+            return false;
         }
     }
     
