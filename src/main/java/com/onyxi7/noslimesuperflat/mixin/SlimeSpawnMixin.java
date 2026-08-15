@@ -4,8 +4,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 @Mixin(targets = {
     "net.minecraft.server.level.ServerLevel",
@@ -13,46 +15,34 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
     "net.minecraft.class_3218",
     "net.minecraft.world.server.ServerWorld",
     "net.minecraft.src.C_12_",
-    "net.minecraft.world.WorldServer"
+    "net.minecraft.world.WorldServer",
+    "net.minecraft.world.World"
 }, remap = false)
 @Pseudo
 public abstract class SlimeSpawnMixin {
 
-    // Modern versions (1.17+) with Mojang/Yarn mappings
     @Inject(method = {
         "addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z",
         "addEntity(Lnet/minecraft/entity/Entity;)Z",
         "method_8742(Lnet/minecraft/class_1297;)Z",
-        "func_217392_a(Lnet/minecraft/entity/Entity;)Z"
-    }, at = @At("HEAD"), cancellable = true, remap = false, require = 0)
-    private void noSlimeSuperflat$blockSlimeModern(net.minecraft.world.entity.Entity entity, CallbackInfoReturnable<Boolean> cir) {
-        handleEntitySpawn(entity, cir);
-    }
-
-    // Old versions (1.8-1.12) - spawnEntity returns boolean
-    @Inject(method = {
+        "func_217392_a(Lnet/minecraft/entity/Entity;)Z",
         "spawnEntity(Lnet/minecraft/entity/Entity;)Z",
         "func_72838_d(Lnet/minecraft/entity/Entity;)Z"
     }, at = @At("HEAD"), cancellable = true, remap = false, require = 0)
-    private void noSlimeSuperflat$blockSlimeOld(net.minecraft.entity.Entity entity, CallbackInfoReturnable<Boolean> cir) {
-        handleEntitySpawn(entity, cir);
-    }
-
-    private void handleEntitySpawn(Object entity, CallbackInfoReturnable<Boolean> cir) {
+    private void noSlimeSuperflat$blockSlime(Object entity, CallbackInfoReturnable<Boolean> cir) {
         try {
             if (shouldBlockEntity(entity)) {
-                log("Blocking slime spawn: " + entity.getClass().getName());
+                System.out.println("[NoSlimeSuperflat] Blocked slime spawn in superflat world!");
                 cir.setReturnValue(false);
             }
         } catch (Throwable t) {
-            logError("Error in handleEntitySpawn: " + t.getMessage());
+            // Silently ignore
         }
     }
 
     private boolean shouldBlockEntity(Object entity) {
         try {
             String entityClass = entity.getClass().getName();
-            log("Checking entity: " + entityClass);
             
             boolean isSlime = 
                 entityClass.contains("Slime") ||
@@ -61,88 +51,128 @@ public abstract class SlimeSpawnMixin {
                 entityClass.equals("net.minecraft.world.entity.monster.Slime") ||
                 entityClass.equals("net.minecraft.class_1685") ||
                 entityClass.equals("net.minecraft.entity.mob.SlimeEntity") ||
-                entityClass.contains("EntitySlime") ||
-                entityClass.endsWith("Slime");
+                entityClass.endsWith("EntitySlime");
             
             if (!isSlime) {
                 return false;
             }
 
-            log("Entity is a slime, checking world type...");
-            boolean isSuperflat = isSuperflatWorld(this);
-            log("Is superflat world: " + isSuperflat);
-            
-            return isSuperflat;
+            return isSuperflatWorld(this);
             
         } catch (Throwable t) {
-            logError("Error in shouldBlockEntity: " + t.getMessage());
             return false;
         }
     }
     
     private static boolean isSuperflatWorld(Object world) {
         try {
-            // Try modern method (1.17+) - Mojang mappings
+            // 1. Modern (1.17+)
             try {
-                Object server = world.getClass().getMethod("getServer").invoke(world);
-                Object worldData = server.getClass().getMethod("getWorldData").invoke(server);
-                return (Boolean) worldData.getClass().getMethod("isFlatWorld").invoke(worldData);
-            } catch (Throwable t1) {
-                // Ignore and try next method
+                Method getServer = findMethod(world.getClass(), "getServer");
+                if (getServer != null) {
+                    Object server = getServer.invoke(world);
+                    Method getWorldData = findMethod(server.getClass(), "getWorldData");
+                    if (getWorldData != null) {
+                        Object worldData = getWorldData.invoke(server);
+                        Method isFlatWorld = findMethod(worldData.getClass(), "isFlatWorld");
+                        if (isFlatWorld != null) {
+                            return (Boolean) isFlatWorld.invoke(worldData);
+                        }
+                    }
+                }
+            } catch (Throwable ignored) {}
+
+            // 2. Legacy (1.8 - 1.16) - Get WorldInfo
+            Object worldInfo = getWorldInfoObject(world);
+            if (worldInfo != null) {
+                // Try getTerrainType (MCP) or func_76067_t (SRG)
+                Object terrainType = null;
+                Method getTerrainType = findMethod(worldInfo.getClass(), "getTerrainType", "func_76067_t");
+                if (getTerrainType != null) {
+                    terrainType = getTerrainType.invoke(worldInfo);
+                }
+
+                if (terrainType != null) {
+                    // Check against WorldType.FLAT
+                    try {
+                        Class<?> worldTypeClass = Class.forName("net.minecraft.world.WorldType");
+                        Field flatField = null;
+                        try { flatField = worldTypeClass.getField("FLAT"); } catch (NoSuchFieldException ignored) {}
+                        
+                        if (flatField != null) {
+                            Object flatType = flatField.get(null);
+                            if (terrainType.equals(flatType)) return true;
+                        }
+                    } catch (Throwable ignored) {}
+
+                    // Check name
+                    Method getName = findMethod(terrainType.getClass(), "getName", "func_77127_a", "name");
+                    if (getName != null) {
+                        String name = (String) getName.invoke(terrainType);
+                        if (name != null && name.equalsIgnoreCase("flat")) return true;
+                    }
+                    
+                    if (terrainType.toString().toLowerCase().contains("flat")) return true;
+                }
             }
-            
-            // Try Forge 1.12.2 method - access worldInfo field directly
+
+            // 3. Fallback: Generator check
             try {
-                // Get the worldInfo field from World class
-                java.lang.reflect.Field worldInfoField = world.getClass().getSuperclass().getDeclaredField("worldInfo");
-                worldInfoField.setAccessible(true);
-                Object worldInfo = worldInfoField.get(world);
-                
-                // Call getTerrainType() to get WorldType
-                Object terrainType = worldInfo.getClass().getMethod("getTerrainType").invoke(worldInfo);
-                
-                // Check if it's FLAT
-                String typeName = terrainType.toString();
-                if (typeName.contains("FLAT") || typeName.contains("flat")) {
-                    return true;
+                Method getChunkSource = findMethod(world.getClass(), "getChunkSource", "func_72863_F");
+                if (getChunkSource != null) {
+                    Object chunkSource = getChunkSource.invoke(world);
+                    Method getGenerator = findMethod(chunkSource.getClass(), "getGenerator");
+                    if (getGenerator != null) {
+                        Object generator = getGenerator.invoke(chunkSource);
+                        String genClass = generator.getClass().getName();
+                        if (genClass.contains("Flat") || genClass.contains("flat")) return true;
+                    }
                 }
-                
-                // Also check the name directly
-                try {
-                    String name = (String) terrainType.getClass().getMethod("getName").invoke(terrainType);
-                    return name != null && name.toLowerCase().contains("flat");
-                } catch (Throwable ignored) {
-                    // Method might not exist
-                }
-                
-                return false;
-            } catch (Throwable t2) {
-                // Try alternative method for 1.13-1.16
-                try {
-                    java.lang.reflect.Field worldInfoField = world.getClass().getDeclaredField("worldInfo");
-                    worldInfoField.setAccessible(true);
-                    Object worldInfo = worldInfoField.get(world);
-                    return (Boolean) worldInfo.getClass().getMethod("isFlatWorld").invoke(worldInfo);
-                } catch (Throwable t3) {
-                    logError("Failed to detect world type: " + t3.getMessage());
-                    return false;
-                }
-            }
+            } catch (Throwable ignored) {}
+
+            return false;
         } catch (Throwable t) {
-            logError("Critical error in isSuperflatWorld: " + t.getMessage());
+            System.err.println("[NoSlimeSuperflat ERROR] Failed to detect world type: " + t.getMessage());
             return false;
         }
     }
-    
-    private static void log(String message) {
-        try {
-            System.out.println("[NoSlimeSuperflat] " + message);
-        } catch (Throwable ignored) {}
+
+    private static Object getWorldInfoObject(Object world) throws Exception {
+        // Try methods (MCP and SRG names)
+        Method getWorldInfo = findMethod(world.getClass(), "getWorldInfo", "func_72912_H");
+        if (getWorldInfo != null) {
+            return getWorldInfo.invoke(world);
+        }
+
+        // Try fields (MCP and SRG names)
+        Class<?> clazz = world.getClass();
+        while (clazz != null) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.getName().equals("worldInfo") || 
+                    field.getName().equals("field_72986_A") || 
+                    field.getType().getName().contains("WorldInfo")) {
+                    field.setAccessible(true);
+                    return field.get(world);
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return null;
     }
-    
-    private static void logError(String message) {
-        try {
-            System.err.println("[NoSlimeSuperflat ERROR] " + message);
-        } catch (Throwable ignored) {}
+
+    private static Method findMethod(Class<?> clazz, String... names) {
+        Class<?> current = clazz;
+        while (current != null) {
+            for (Method m : current.getDeclaredMethods()) {
+                for (String name : names) {
+                    if (m.getName().equals(name) && m.getParameterCount() == 0) {
+                        m.setAccessible(true);
+                        return m;
+                    }
+                }
+            }
+            current = current.getSuperclass();
+        }
+        return null;
     }
 }
