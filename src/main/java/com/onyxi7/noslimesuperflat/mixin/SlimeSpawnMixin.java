@@ -8,17 +8,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = {
-    // Modern versions (1.17+) - Mojang mappings
     "net.minecraft.server.level.ServerLevel",
-    // Fabric Yarn
     "net.minecraft.server.world.ServerWorld",
-    // Fabric Intermediary
     "net.minecraft.class_3218",
-    // Forge MCP (1.14-1.16)
     "net.minecraft.world.server.ServerWorld",
-    // Forge SRG
     "net.minecraft.src.C_12_",
-    // Old versions (1.8-1.12)
     "net.minecraft.world.WorldServer"
 }, remap = false)
 @Pseudo
@@ -44,49 +38,22 @@ public abstract class SlimeSpawnMixin {
         handleEntitySpawn(entity, cir);
     }
 
-    // For versions where spawnEntity returns void (fallback)
-    @Inject(method = {
-        "spawnEntity(Lnet/minecraft/entity/Entity;)V"
-    }, at = @At("HEAD"), cancellable = true, remap = false, require = 0)
-    private void noSlimeSuperflat$blockSlimeVoid(net.minecraft.entity.Entity entity, CallbackInfo ci) {
-        handleEntitySpawnVoid(entity, ci);
-    }
-
     private void handleEntitySpawn(Object entity, CallbackInfoReturnable<Boolean> cir) {
         try {
             if (shouldBlockEntity(entity)) {
+                log("Blocking slime spawn: " + entity.getClass().getName());
                 cir.setReturnValue(false);
             }
         } catch (Throwable t) {
-            // Silently ignore errors to prevent crashes
-        }
-    }
-
-    private void handleEntitySpawnVoid(Object entity, CallbackInfo ci) {
-        try {
-            if (shouldBlockEntity(entity)) {
-                ci.cancel();
-                try {
-                    entity.getClass().getMethod("setDead").invoke(entity);
-                } catch (Throwable ignored) {
-                    try {
-                        entity.getClass().getMethod("discard").invoke(entity);
-                    } catch (Throwable ignored2) {
-                        // Entity will still spawn, but we tried
-                    }
-                }
-            }
-        } catch (Throwable t) {
-            // Silently ignore
+            logError("Error in handleEntitySpawn: " + t.getMessage());
         }
     }
 
     private boolean shouldBlockEntity(Object entity) {
         try {
-            // Check if it's a slime by class name
             String entityClass = entity.getClass().getName();
+            log("Checking entity: " + entityClass);
             
-            // List of all possible slime class names across versions
             boolean isSlime = 
                 entityClass.contains("Slime") ||
                 entityClass.equals("net.minecraft.entity.monster.EntitySlime") ||
@@ -101,10 +68,14 @@ public abstract class SlimeSpawnMixin {
                 return false;
             }
 
-            // Check if world is superflat
-            return isSuperflatWorld(this);
+            log("Entity is a slime, checking world type...");
+            boolean isSuperflat = isSuperflatWorld(this);
+            log("Is superflat world: " + isSuperflat);
+            
+            return isSuperflat;
             
         } catch (Throwable t) {
+            logError("Error in shouldBlockEntity: " + t.getMessage());
             return false;
         }
     }
@@ -124,25 +95,33 @@ public abstract class SlimeSpawnMixin {
                 try {
                     Object terrainType = worldInfo.getClass().getMethod("getTerrainType").invoke(worldInfo);
                     String typeString = terrainType.toString();
+                    log("Terrain type: " + typeString);
                     return typeString.contains("FLAT") || typeString.contains("flat");
                 } catch (Throwable t2) {
                     // Try isFlatWorld() (1.13-1.16)
                     try {
                         return (Boolean) worldInfo.getClass().getMethod("isFlatWorld").invoke(worldInfo);
                     } catch (Throwable t3) {
-                        // Try getGenerator() method
-                        try {
-                            Object generator = world.getClass().getMethod("getChunkSource").invoke(world);
-                            String generatorClass = generator.getClass().getName();
-                            return generatorClass.contains("Flat") || generatorClass.contains("flat");
-                        } catch (Throwable t4) {
-                            return false;
-                        }
+                        logError("All world detection methods failed");
+                        return false;
                     }
                 }
             } catch (Throwable t5) {
+                logError("Failed to get WorldInfo: " + t5.getMessage());
                 return false;
             }
         }
+    }
+    
+    private static void log(String message) {
+        try {
+            System.out.println("[NoSlimeSuperflat] " + message);
+        } catch (Throwable ignored) {}
+    }
+    
+    private static void logError(String message) {
+        try {
+            System.err.println("[NoSlimeSuperflat ERROR] " + message);
+        } catch (Throwable ignored) {}
     }
 }
